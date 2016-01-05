@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "description": "demos from elegant-api",
   "scripts": {
-    "fe-server": "node frontend-server.js",
-    "be-server": "node backend-server.js"
+    "fe": "node servers/frontend.js",
+    "rd": "node servers/backend.js"
   },
   "author": "Mora",
   "license": "MIT",

@@ -7,6 +7,8 @@
 ```es6
 import elegantApi from 'elegant-api';
 
+/****  定义接口 ****/
+
 let options = {
   mock: 'local',
   mockDelay: {min: 300, max: 5000},
@@ -41,7 +43,7 @@ let mocks = { // 发布上线后不需要要保留 mocks
 let api = elegantApi(options, mocks);
 
 
-// 最后
+/**** 调用接口 *****/
 
 api.user({uid: 3}, (err, data) => {
   // data 将会是 mocks 中指定的 user
@@ -59,10 +61,10 @@ api.$request('user', {uid: 3}, (err, data) => {});
 
 1. 六种开发模式
   * **LOCAL  模式：** 无后端，无服务器，后端数据通过前端直接 mock (`mock = 'local'`)
-  * **MOCK   模式：** 在 local 服务器上嵌入 mock 服务器，数据从 mock 服务器生成 (`mock = 'mock'`)
-  * **PROXY  模式：** 在 local 服务器上嵌入 proxy 服务器，后端数据通过代理服务器传给前端 (`mock = 'proxy'`)
-  * **MOCK STANDALONE 模式：** 使用一个独立的 mock 服务器 (`mock='mock:http://localhost:9001'`)
-  * **PROXY STANDALONE模式：** 使用一个独立的 proxy 服务器 (`mock='proxy:http://backend.server.com:9001'`)
+  * **SERVER 模式：** 在 local 服务器上嵌入 mock 服务器，数据从 mock 服务器生成 (`mock = 'server'`)
+  * **PROXY  模式：** 在 local 服务器上嵌入 proxy 服务器，后端数据通过代理服务器传给前端 (`mock = 'proxy:http://backend.server.com:9001'`)
+  * **SERVER STANDALONE 模式：** 使用一个独立的 mock 服务器 (还不支持，主要无法把当前的 http 对象传给另一个域名下的服务器)
+  * **PROXY  STANDALONE模式：** 使用一个独立的 proxy 服务器 (还不支持，理由同上)
   * **ONLINE 模式：** 线上模式，无任何 mock
 2. **alias：** 可以对 request data 或 response data 中的字段取别名
 3. **map：** 可以返回一个新的 request data 或 response data
@@ -71,7 +73,7 @@ api.$request('user', {uid: 3}, (err, data) => {});
 6. **模拟延迟：** `mockDelay=3000` 或者 `mockDelay={min: 100, max: 4000}`
 7. **缓存 HTTP 请求：** 默认只有 GET 请求才会缓存，不过可以在任意一个 route 中配置 `cache` 变量，来标识是否使用缓存
 8. **emulateJSON 和 emulateHTTP：** 来自于 [vue-resource](https://github.com/vuejs/vue-resource/tree/0.5.1#options)
-9. **参数验证：** 支持对前端 request 的 query 和 data 中的字段进行 validate
+9. **参数验证：** 支持对设置 request 中的 params, query 和 data 字段，并可以 validate 其中 query 和 data
 10. **批量请求：** 
   ```es6
   // 并行
@@ -107,7 +109,6 @@ api.$request('user', {uid: 3}, (err, data) => {});
 ## TODO
 
 * path 中可能带参数(params)
-* query 和 data 也可以继承 baseOptions 
 * 自动生成后端的 api 文档 https://sample-threes.readme.io/docs/orders
 * 支持 resource
 

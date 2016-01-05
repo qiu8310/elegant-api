@@ -3,7 +3,7 @@ export default {
 
   cache: 'smart',
 
-  mock: 'mock:http://127.0.0.1:9010',
+  mock: 'server:http://127.0.0.1:9010',
   mockDelay: 10,
 
   routes: {

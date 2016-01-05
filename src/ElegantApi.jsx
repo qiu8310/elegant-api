@@ -2,13 +2,13 @@ import defaultHttpOptions from './defaultHttpOptions';
 import transform from 'naming-transform';
 import util from './util';
 
-
 export default class ElegantApi {
 
   constructor(baseOptions, mockOptions) {
     baseOptions = util.extend(true, {}, defaultHttpOptions, baseOptions);
 
     this.baseOptions = baseOptions;
+    this._normalizeRouteQueryAndData(baseOptions);
 
     this.global = baseOptions.global;
     this.prefix = this.global.eaQueryPrefix;
@@ -40,6 +40,7 @@ export default class ElegantApi {
     http.path = (route.base + route.path).replace(/(?:[^:])\/\//g, '\/');
     http.method = http.method.toUpperCase();
   }
+
 
   /**
    * 对 httpOptions 的中的 route 中的 query 和 data 格式进行统一，并且保证它们一定存在，且为 Object 类型
@@ -93,26 +94,42 @@ export default class ElegantApi {
   }
 
   /**
-   * 通过用户指定的 params 和 route 中的要求，得到接口需要的 params
+   * 通过用户指定的 userParams 和 route 中的要求，得到接口需要的 params/query/data
    *
-   *  - 如果 params 中不存在 query 和 data 字段，则自动从 params 中取出需要的 query，再把剩下的全交给 data
-   *  - 否则 params 中需要指定 query 和 data
+   *  - 如果 userParams 中不存在 query、 data 和 params 字段，
+   *    则自动从 params 中取出需要的 params 和 query，再把剩下的全交给 data
+   *
+   *  - 否则 userParams 中需要指定 query 和 data
    */
-  _applyUserParams(params, route) {
-    let query = params.query || {}, data = params.data || {};
+  _applyUserParams(userParams, route) {
+    let query = userParams.query || {},
+      data = userParams.data || {},
+      paramsReg = /\/:([-\w]+)/g;
 
-    if (!params.query && !params.data) {
+    let params = {};
+    route.http.path.replace(paramsReg, (r, key) => {
+      params[key] = true;
+    });
+
+    if (!userParams.query && !userParams.data && !userParams.params) {
       let queryKeys = Object.keys(route.query).map(key => route.query[key].alias || key);
 
-      for (let key in params) {
-        if (queryKeys.indexOf(key) >= 0) query[key] = params[key];
-        else data[key] = params[key];
+      for (let key in userParams) {
+        if (key in params) params[key] = userParams[key];
+        else if (queryKeys.indexOf(key) >= 0) query[key] = userParams[key];
+        else data[key] = userParams[key];
       }
     }
+
+    let path = route.http.path.replace(paramsReg, (r, key) => {
+      if (params[key] === true) throw new SyntaxError(`Missing path params ${key}.`);
+      return '/' + params[key];
+    });
+
     this._checkUserParams(query, route.query);
     this._checkUserParams(data, route.data);
 
-    return {query, data};
+    return {path, query, data, params};
   }
 
   /**
@@ -199,16 +216,17 @@ export default class ElegantApi {
     return source;
   }
 
-
-  _generateRequestHttp(key, params, route) {
-    let {query, data} = this._applyUserParams(params, route);
+  _generateRequestHttp(key, userParams, route) {
+    let {path, query, data, params} = this._applyUserParams(userParams, route);
     let http = util.extend(true, {}, route.http);
 
+    http.params = params;
+
     /* istanbul ignore else */
-    if (route.mock) query.__ea = key;
+    if (route.mock) query.__ea = key + (route.mock !== 'local' ? '|' + route.mock : '');
 
     let qs = util.buildQuery(query);
-    http.url = http.path + (qs ? '?' + qs : '');
+    http.url = path + (qs ? '?' + qs : '');
 
     data = this._map(data, route.request);
 
@@ -252,21 +270,24 @@ export default class ElegantApi {
     setTimeout(() => callback(), delay > 0 ? delay : 0);
   }
 
-
   _generateRequestResponse(route, key, http, callback) {
     if (route.mock === 'local') {
       this._delay(route.mockDelay, () => this.responseMock(key, http, callback));
     } else {
-      if (/^mock/.test(route.mock)) {
-        document.cookie = '__ea=' + JSON.stringify(http) + '; path=/';
+      if (route.mock === 'server') {
+        // cookie 不支持跨域
+        document.cookie = '__ea' + key + '='
+          + encodeURIComponent(JSON.stringify(http))
+          + '; expires=' + (new Date(Date.now() + 5000).toUTCString())
+          + '; path=/';
       }
       route.handler(http, callback);
     }
   }
 
   _generateRequestFunction(key, route) {
-    return (params, cb) => {
-      let http = this._generateRequestHttp(key, params, route);
+    return (userParams, cb) => {
+      let http = this._generateRequestHttp(key, userParams, route);
       let cacheKey, cacheMap;
 
       let callback = (err, data) => {
@@ -355,9 +376,13 @@ export default class ElegantApi {
   }
 
   api(key, option, mockOption) {
+    // extend 之前要将 options 中的 query 和 data 转化成 Object
+    this._normalizeRouteQueryAndData(option);
+
     let route = util.extend(true, {}, this.baseOptions, option);
+
     this._normalizeRouteHTTP(route);
-    this._normalizeRouteQueryAndData(route);
+
     route.cache = route.cache === true || route.cache === 'smart' && route.http.method === 'GET';
 
     this.routes[key] = this._generateRequestFunction(key, route);

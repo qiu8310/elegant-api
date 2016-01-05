@@ -14,22 +14,20 @@
 </head>
 
 <body>
-  <script type="text/javascript" src="../../node_modules/jquery/dist/jquery.js"></script>
-  <script type="text/javascript" src="../../dist/elegant-api.js"></script>
-  <script type="text/javascript" src="../shared-options.js"></script>
+  <script type="text/javascript" src="jquery.js"></script>
+  <script type="text/javascript" src="elegant-api.js"></script>
+  <script type="text/javascript" src="db.js"></script>
+  <script type="text/javascript" src="shared-options.js"></script>
   <script type="text/javascript">
   var api = elegantApi(OPTIONS);
 
-  var uid = Math.round(Math.random() * 1000);
-  var query = {uid: uid};
-
-  api.user(query, function (err, data) {
-    console.log(err, data);
+  api.getUser({uid: 1}, function (err, data1) {
 
     // 第二次请求同一个接口应该缓存
-    api.user(query, function (err, data2) {
-      console.log(data2.random === data.random);
+    api.getUser({uid: 1}, function (err, data2) {
+      console.log(data1.data, data2.data);
     });
+
   });
   </script>
 </body>

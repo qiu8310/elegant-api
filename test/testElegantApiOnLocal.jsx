@@ -83,11 +83,62 @@ before(() => {
 
 describe('ElegantApi on Local', () => {
 
-  it('should support request query and data params', done => {
+  it('should support request query and data', done => {
     // request 的参数的两种写法
     assert.doesNotThrow(() => EA.request('foo', {id: 3, a: 'a', c: 'c'}));
     assert.doesNotThrow(() => EA.request('foo', {query: {id: 3}, data: {a: 'a', c: 'c'}}));
     done();
+  });
+
+  it('should inherit baseOptions query and data', done => {
+    let EA = new ElegantApi({
+      mockDelay: 0,
+      query: 'q1=1&q2=',
+      data: 'd1=1&d2=',
+      routes: {
+        user: {
+          query: 'q3=3&q4=',
+          data: 'd3=3&d4='
+        }
+      },
+      mocks: {
+        user(http, callback) { callback(null, http); }
+      }
+    });
+
+    EA.request('user', {q3: '3333', q4: '4', q2: '2', d3: '3333', d4: '4', d2: '2'}, (err, data) => {
+      data.query.q1.should.eql('1');
+      data.query.q2.should.eql('2');
+      data.query.q3.should.eql('3333');
+      data.query.q4.should.eql('4');
+      data.data.d1.should.eql('1');
+      data.data.d2.should.eql('2');
+      data.data.d3.should.eql('3333');
+      data.data.d4.should.eql('4');
+      done();
+    });
+  });
+
+  it('should support request path params', done => {
+    let EA = new ElegantApi({
+      mockDelay: 0,
+      routes: {
+        user: {
+          path: '/:prefix/users/:uid'
+        }
+      },
+      mocks: {
+        user(http, callback) { callback(null, http); }
+      }
+    });
+
+    let params = {prefix: 'foo', uid: 30};
+    EA.request('user', params, (err, data) => {
+      assert.deepEqual(params, data.params);
+
+      assert.throws(() => EA.request('user', {prefix: 'bar'}), /Missing path params uid/);
+      done();
+    });
   });
 
   it('should mock get user', done => {

@@ -14,17 +14,18 @@
 </head>
 
 <body>
-  <script type="text/javascript" src="../../node_modules/jquery/dist/jquery.js"></script>
-  <script type="text/javascript" src="../../dist/elegant-api.js"></script>
-  <script type="text/javascript" src="../shared-options.js"></script>
+  <script type="text/javascript" src="jquery.js"></script>
+  <script type="text/javascript" src="elegant-api.js"></script>
+  <script type="text/javascript" src="db.js"></script>
+  <script type="text/javascript" src="shared-options.js"></script>
   <script type="text/javascript">
   var api = elegantApi(OPTIONS);
 
   api.$request({
-    user: {uid: 10},
-    foo: {a: 'aa', b: 'bb'}
+    getUser: {uid: 10},
+    getAllUsers: {}
   }, function (errorMap, dataMap) {
-    console.log('errorMap %o, dataMap %o', errorMap, dataMap);
+    console.log(errorMap, dataMap);
   });
 
   </script>

@@ -1,77 +1,26 @@
-import http from 'http';
-import qs from 'querystring';
-import bodyParser from 'body-parser';
-
-import ElegantApi from '../../src/ElegantApi';
 import OPTIONS from './options';
 
-let jsonParser = bodyParser.json();
-let urlencodedParser = bodyParser.urlencoded({extended: false});
+let cookieParser = require('cookie-parser');
+let eaExpressMiddleware = require('../../plugins/express-middleware');
+let app = require('express')();
 
-let EA = new ElegantApi(OPTIONS);
-
-
-function mock(EA, key, req, res, callback) {
-
-  jsonParser(req, res, err => {
-    if (err) return callback(err);
-
-    urlencodedParser(req, res, err => {
-      if (err) return callback(err);
-
-      let [, query] = req.url.split('?');
-
-      req.query = qs.decode(query);
-      req.data = req.body;
-
-      EA.responseMock(key, req, callback);
-
-    });
-  });
-}
-
-
-let app = http.createServer((req, res) => {
-  var url = req.url,
-    status = 200,
-    end = function (data) {
-      res.write(JSON.stringify(data));
-      res.end();
-    };
-
-  if (/\berror\b/i.test(url)) {
-    status = 500;
-  }
-
-  res.writeHead(status, {
-    'Content-Type': 'application/json;charset=utf-8',
-    'Access-Control-Allow-Origin': '*'
-  });
-
-  if (status !== 200) return end({});
-
-  if (/\bcloseServer\b/i.test(url)) {
-    app.close();
-  } else if (/\b__ea=(\w+)/.test(url)) {
-    return mock(EA, RegExp.$1, req, res, (err, data) => {
-      if (err) end({status: -2, message: 'http request error', error: err});
-      else {
-        if (data.status) end(data);
-        else end({status: 0, message: 'ok', data});
-      }
-    });
-  } else {
-    end({status: -1, message: 'No __ea parameter'});
-  }
+app.use(function (req, res, next) {
+  res.append('Access-Control-Allow-Origin', '*');
+  next();
 });
+
+app.use(cookieParser());
+app.use(eaExpressMiddleware(require('./options')));
 
 
 let [, path] = OPTIONS.mock.split('//');
 let [host, port] = path.split(':');
-console.log('Server start listen ' + path);
-app.listen(port, host, () => {
-  if (app.__up) app.__up();
-  app.__uped = true;
+
+let server = app.listen(port, host, () => {
+  if (server.__up) server.__up();
+  server.__uped = true;
+
+  console.log('Test engine server start on ' + path);
 });
 
-export default app;
+export default server;

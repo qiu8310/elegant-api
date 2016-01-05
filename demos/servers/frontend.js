@@ -1,5 +1,5 @@
 var cookieParser = require('cookie-parser');
-var eaExpressMiddleware = require('../plugins/express-middleware');
+var eaExpressMiddleware = require('../../plugins/express-middleware');
 
 var path = require('path');
 var express = require('express');
@@ -11,10 +11,14 @@ app.use(function (req, res, next) {
 });
 
 app.use(express.static('.'));
-app.use(express.static('..'));
+app.use(express.static('./pages'));
+app.use(express.static('./data'));
+app.use(express.static('./data'));
+app.use(express.static('../dist'));
+app.use(express.static('../node_modules/jquery/dist'));
 
 app.use(cookieParser());
-app.use(eaExpressMiddleware(require('./shared-options')));
+app.use(eaExpressMiddleware(require('../data/shared-options')));
 
 
 app.get('/favicon.ico', function (req, res) {
@@ -29,5 +33,5 @@ app.all('*', function (req, res) {
 
 
 app.listen(3000, function () {
-  console.log('\nServer on http://localhost:3000/\n');
+  console.log('\nFrontend server listen on localhost:3000/\n');
 });

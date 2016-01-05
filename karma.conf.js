@@ -60,14 +60,14 @@ module.exports = function (config) {
       ]
     },
 
-
     // enable / disable colors in the output (reporters and logs)
     colors: true,
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     browsers: [
-      'PhantomJS' // 'Firefox'
+      // 'Firefox',
+      'PhantomJS'
     ].concat(require('os').platform() === 'win32' ? 'IE' : [])
 
   });

@@ -33,7 +33,7 @@ describe('ElegantApi on Server', () => {
     });
   });
 
-  it('should mock jquery get method', done => {
+  xit('should mock jquery get method', done => {
     window.jQuery = $;
     let options = util.extend({}, OPTIONS, {base});
 
@@ -48,7 +48,7 @@ describe('ElegantApi on Server', () => {
     });
   });
 
-  it('should mock jquery post method', done => {
+  xit('should mock jquery post method', done => {
     window.jQuery = $;
     let options = util.extend({}, OPTIONS, {base});
 
@@ -63,7 +63,7 @@ describe('ElegantApi on Server', () => {
     });
   });
 
-  it('should mock jquery error status', done => {
+  xit('should mock jquery error status', done => {
     window.jQuery = $;
     let options = util.extend({}, OPTIONS, {base});
 
@@ -75,10 +75,9 @@ describe('ElegantApi on Server', () => {
       delete window.jQuery;
       done();
     });
-
   });
 
-  it('should mock jquery request error', done => {
+  xit('should mock jquery request error', done => {
     window.jQuery = $;
     let options = util.extend({}, OPTIONS, {base});
 

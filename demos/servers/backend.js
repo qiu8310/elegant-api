@@ -72,5 +72,5 @@ app.delete('/api/users/:uid', function (req, res) {
 
 
 app.listen(4000, function () {
-  console.log('Server on localhost:4000');
+  console.log('\nBackend server listen on localhost:4000\n');
 });

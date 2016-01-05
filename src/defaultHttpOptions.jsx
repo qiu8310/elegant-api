@@ -50,10 +50,7 @@ export default {
     let $ = window.jQuery && window.jQuery.ajax;
     if ($) {
       return $(http)
-        .success(data => {
-          if (data.status === 0) callback(null, data.data);
-          else callback(data);
-        })
+        .success(data => callback(data))
         .error(xhr => callback(xhr));
     }
 
