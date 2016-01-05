@@ -1,0 +1,13 @@
+{
+  "name": "elegant-api-demos",
+  "version": "0.0.0",
+  "description": "demos from elegant-api",
+  "scripts": {
+    "fe-server": "node frontend-server.js",
+    "be-server": "node backend-server.js"
+  },
+  "author": "Mora",
+  "license": "MIT",
+  "devDependencies": {
+  }
+}

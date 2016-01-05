@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+
+<html class="root zh" lang="zh">
+<head>
+  <title>Elegant API Mock Demo</title>
+  <meta charset="utf-8">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  <meta name="author" content="qiuzhongleiabc@126.com">
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1">
+</head>
+
+<body>
+  <script type="text/javascript" src="../../node_modules/jquery/dist/jquery.js"></script>
+  <script type="text/javascript" src="../../dist/elegant-api.js"></script>
+  <script type="text/javascript" src="../shared-options.js"></script>
+  <script type="text/javascript">
+  var api = elegantApi(OPTIONS);
+
+  api.$request({
+    user: {uid: 10},
+    foo: {a: 'aa', b: 'bb'}
+  }, function (errorMap, dataMap) {
+    console.log('errorMap %o, dataMap %o', errorMap, dataMap);
+  });
+
+  </script>
+</body>
+</html>
