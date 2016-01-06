@@ -6,7 +6,8 @@
   "jsnext:main": "src/index.jsx",
   "scripts": {
     "lint": "cs -f --jshint --jscs --eslint *.js plugins/**/*.js test/**/*.jsx src/**/*.jsx",
-    "test-server": "babel-node ./test/server/engine.jsx",
+    "test-fe-server": "babel-node ./test/server/fe.jsx",
+    "test-rd-server": "babel-node ./test/server/rd.jsx",
     "test-watch": "karma start",
     "test": "babel-node ./test/server/start.jsx",
     "pub": "npm run lint && webpack && webpack -p"
@@ -33,7 +34,8 @@
   },
   "homepage": "https://github.com/qiu8310/elegant-api#readme",
   "dependencies": {
-    "naming-transform": "0.0.7"
+    "naming-transform": "0.0.7",
+    "raw-body": "^2.1.5"
   },
   "devDependencies": {
     "babel-cli": "^6.3.17",

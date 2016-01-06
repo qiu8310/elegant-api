@@ -1,6 +1,9 @@
 import defaultHttpOptions from './defaultHttpOptions';
 import transform from 'naming-transform';
 import util from './util';
+import mockResponse from '../plugins/mock';
+
+let STORAGE = window.localStorage /* istanbul ignore next */ || {};
 
 export default class ElegantApi {
 
@@ -37,7 +40,7 @@ export default class ElegantApi {
       if (route[key]) http[key] = route[key];
     }
 
-    http.path = (route.base + route.path).replace(/(?:[^:])\/\//g, '\/');
+    http.path = util.urlNormalize(route.base + route.path);
     http.method = http.method.toUpperCase();
   }
 
@@ -216,34 +219,79 @@ export default class ElegantApi {
     return source;
   }
 
-  _generateRequestHttp(key, userParams, route) {
+  _generateRequestTransformData(route, http) {
+    let ea = STORAGE.__ea ? JSON.parse(STORAGE.__ea) : {};
+
+    location.search.slice(1).split('&').reduce((ea, pair) => {
+      let [key, value] = pair.split('=').map(decodeURIComponent);
+      if (key !== this.prefix && key.indexOf(this.prefix) === 0) ea[key] = value;
+      return ea;
+    }, ea);
+
+    STORAGE.__ea = JSON.stringify(ea);
+
+    return {
+      mock: route.mock,
+      params: http.params,
+      query: http.query,
+      data: http.data,
+      ea: ea
+    };
+  }
+
+  _generateRequestHttpAndTransformData(key, userParams, route) {
     let {path, query, data, params} = this._applyUserParams(userParams, route);
     let http = util.extend(true, {}, route.http);
 
+    data = this._map(data, route.request);
+
     http.params = params;
+    http.query = query;
+    http.data = data;
+
+    let mock = route.mock;
+    let transformData = this._generateRequestTransformData(route, http);
 
     /* istanbul ignore else */
-    if (route.mock) query.__ea = key + (route.mock !== 'local' ? '|' + route.mock : '');
+    if (mock) {
+      if (mock !== 'memory') {
+        transformData = JSON.stringify(transformData);
+        query.__ea = key;
+
+        // cookie 不支持跨域，但在 karma 上只能测试到跨域
+        /* istanbul ignore if */
+        if (!mock.server && route.dataTransformMethod === 'cookie') {
+          document.cookie = '__ea' + key + '='
+            + encodeURIComponent(transformData)
+            + '; expires=' + (new Date(Date.now() + 5000).toUTCString())
+            + '; path=/';
+        } else {
+          query.__eaData = transformData;
+        }
+      }
+    }
 
     let qs = util.buildQuery(query);
     http.url = path + (qs ? '?' + qs : '');
 
-    data = this._map(data, route.request);
+    if (mock && mock.server && !/^https?:\/\//.test(http.url)) {
+      http.crossOrigin = true;
+      http.url = util.urlNormalize(mock.server + http.url);
+    }
 
     if (route.emulateHTTP && !http.crossOrigin && /^(PUT|PATCH|DELETE)$/.test(http.method)) {
       http.headers['X-HTTP-Method-Override'] = http.method;
       http.method = 'POST';
     }
 
-    if (route.emulateJSON && route.mock !== 'local') {
+    if (route.emulateJSON) {
       http.headers['Content-Type'] = 'application/x-www-form-urlencoded';
       data = util.urlParams(data);
     }
 
     http.data = http.body = data;
-    http.query = query;
 
-    return http;
+    return {http, transformData};
   }
 
   _generateRequestCacheCallback(cacheKey, callback) {
@@ -270,29 +318,15 @@ export default class ElegantApi {
     setTimeout(() => callback(), delay > 0 ? delay : 0);
   }
 
-  _generateRequestResponse(route, key, http, callback) {
-    if (route.mock === 'local') {
-      this._delay(route.mockDelay, () => this.responseMock(key, http, callback));
-    } else {
-      if (route.mock === 'server') {
-        // cookie 不支持跨域
-        document.cookie = '__ea' + key + '='
-          + encodeURIComponent(JSON.stringify(http))
-          + '; expires=' + (new Date(Date.now() + 5000).toUTCString())
-          + '; path=/';
-      }
-      route.handler(http, callback);
-    }
-  }
-
+  // 这个 route 是所有请求都会共享的对象，所以不要随意修改上面已经存在的值
   _generateRequestFunction(key, route) {
     return (userParams, cb) => {
-      let http = this._generateRequestHttp(key, userParams, route);
+      let {http, transformData} = this._generateRequestHttpAndTransformData(key, userParams, route);
       let cacheKey, cacheMap;
 
       let callback = (err, data) => {
         if (data) {
-          data = util.extend(true, {}, data); // 避免在 mock = local 模式下，数据混乱
+          data = util.extend(true, {}, data); // 避免在 mock = memory 模式下，数据混乱
           data = this._map(data, route.response);
         }
         cb(err, data);
@@ -306,7 +340,11 @@ export default class ElegantApi {
         callback = this._generateRequestCacheCallback(cacheKey, callback);
       }
 
-      this._generateRequestResponse(route, key, http, callback);
+      if (route.mock === 'memory') {
+        this._delay(route.mockDelay, () => mockResponse(this.mocks, key, transformData, callback));
+      } else {
+        route.handler(http, callback);
+      }
     };
   }
 
@@ -344,7 +382,7 @@ export default class ElegantApi {
 
     keys.forEach(key => {
       let params = obj[key];
-      this.request(key, params, (err, data) => {
+      this.request(conf.alias && conf.alias[key] || key, params, (err, data) => {
         len--;
 
         iterator(params, key, err, data);
@@ -365,14 +403,6 @@ export default class ElegantApi {
 
   _singleRequest(key, params, callback) {
     return this.routes[key](params, callback);
-  }
-
-  responseMock(key, http, callback) {
-    let target = this.mocks[key];
-
-    if (!(key in this.mocks)) callback(new Error(`Not found "${key}" in mocks options.`));
-    else if (typeof target === 'function') target(http, callback);
-    else callback(null, target);
   }
 
   api(key, option, mockOption) {

@@ -13,14 +13,16 @@ app.use(cookieParser());
 app.use(eaExpressMiddleware(require('./options')));
 
 
-let [, path] = OPTIONS.mock.split('//');
+let path = OPTIONS.mock.server.replace(/^.*\/\//, '');
 let [host, port] = path.split(':');
 
-let server = app.listen(port, host, () => {
-  if (server.__up) server.__up();
-  server.__uped = true;
+console.log('Config', OPTIONS.mock);
 
-  console.log('Test engine server start on ' + path);
+let server = app.listen(port, host, () => {
+  server.__uped = true;
+  if (server.__up) server.__up();
+
+  console.log('Test fe server start on ' + path);
 });
 
 export default server;

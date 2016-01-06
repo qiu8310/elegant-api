@@ -25,7 +25,7 @@ before(() => {
 
   OPTIONS = {
     debug: true,
-    mock: 'local',
+    mock: 'memory',
     mockDelay: 20,
     base: '/api',
     path: '',
@@ -81,7 +81,7 @@ before(() => {
   EA = new ElegantApi(OPTIONS);
 });
 
-describe('ElegantApi on Local', () => {
+describe('ElegantApi on Memory', () => {
 
   it('should support request query and data', done => {
     // request 的参数的两种写法
@@ -166,13 +166,10 @@ describe('ElegantApi on Local', () => {
 
     EA.mock('user', (http, callback) => {
       count++;
-      http.method.should.eql('GET');
+      http.should.have.properties(['ea', 'params', 'mock', 'query', 'data']);
 
-      assert.deepEqual(http.query, {id: 1, apiversion: '1', __ea: 'user'});
+      assert.deepEqual(http.query, {id: 1, apiversion: '1'});
       assert.deepEqual(http.data, {ts: 'data field'});
-      assert.equal(http.data, http.body);
-
-      http.headers.Custom.should.eql('Get User Info');
 
       let id = http.query.id;
       if (USERS[id]) callback(null, USERS[id]);
@@ -215,7 +212,6 @@ describe('ElegantApi on Local', () => {
       let list = [];
       for (let key in USERS) list.push(USERS[key]);
       count++;
-      http.url.should.eql('/api/uc/users?__ea=users');
       callback(null, {
         length: list.length,
         list
@@ -304,7 +300,7 @@ describe('ElegantApi on Local', () => {
     EA.api('bar', {});
     EA.request('bar', err => {
       assert.ok(err);
-      err.message.should.eql('Not found "bar" in mocks options.');
+      err.message.should.eql('Not found mock target for `bar`.');
       done();
     });
   });

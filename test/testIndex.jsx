@@ -2,7 +2,7 @@ import assert from 'should';
 import elegantApi from '../src/index';
 import OPTIONS from './server/options';
 
-OPTIONS.mock = 'local';
+OPTIONS.mock = 'memory';
 let api = elegantApi(OPTIONS);
 
 describe('index', () => {

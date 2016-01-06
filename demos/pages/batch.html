@@ -17,9 +17,11 @@
   <script type="text/javascript" src="jquery.js"></script>
   <script type="text/javascript" src="elegant-api.js"></script>
   <script type="text/javascript" src="db.js"></script>
-  <script type="text/javascript" src="shared-options.js"></script>
+  <script type="text/javascript" src="mocks.js"></script>
+  <script type="text/javascript" src="options.js"></script>
   <script type="text/javascript">
-  var api = elegantApi(OPTIONS);
+
+  var api = elegantApi(OPTIONS, MOCKS);
 
   api.$request({
     getUser: {uid: 10},

@@ -2,24 +2,32 @@
 import { spawn } from 'child_process';
 import path from 'path';
 
-import server from './engine';
+import feServer from './fe';
+import rdServer from './rd';
 
 let karmaBinFile = path.join(__dirname, '..', '..', 'node_modules', '.bin', 'karma');
 let testArgs = [karmaBinFile, 'start', '--no-auto-watch', '--single-run'];
 
 function start() {
+  if (!feServer.__uped || !rdServer.__uped) return false;
+
   let test = spawn('node', testArgs, {stdio: 'inherit'});
 
   test.on('close', code => {
-    server.close(() => {
-      process.exit(code);
-    });
+    process.exit(code);
   });
 }
 
-if (server.__uped) {
-  start();
-} else {
-  server.__up = start;
+function wrapServer(server) {
+  if (server.__uped) {
+    start();
+  } else {
+    server.__up = start;
+  }
 }
+
+wrapServer(feServer);
+wrapServer(rdServer);
+
+
 

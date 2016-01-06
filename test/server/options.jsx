@@ -1,9 +1,13 @@
-export default {
+// 不要用 ES6 的 export default， 这样在 ES5 里用的话会导致 require 多个 default 关键字在最外层
+module.exports = {
   base: '/api/server/',
 
   cache: 'smart',
 
-  mock: 'server:http://127.0.0.1:9010',
+  mock: {server: 'http://127.0.0.1:9010'},
+
+  _proxy: 'http://127.0.0.1:9011', // 给内部用的，和配置没关系
+
   mockDelay: 10,
 
   routes: {

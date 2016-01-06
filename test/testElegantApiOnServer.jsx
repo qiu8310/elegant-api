@@ -4,10 +4,12 @@ import util from '../src/util';
 import OPTIONS from './server/options';
 import $ from 'jquery';
 
-let base = OPTIONS.mock.replace(/^\w+:/, '') + '/';
-
 describe('ElegantApi on Server', () => {
   let EA;
+
+  afterEach(() => {
+    delete window.jQuery;
+  });
 
   it('should mock error', done => {
     EA = new ElegantApi(OPTIONS);
@@ -33,60 +35,50 @@ describe('ElegantApi on Server', () => {
     });
   });
 
-  xit('should mock jquery get method', done => {
+  it('should mock jquery get method', done => {
     window.jQuery = $;
-    let options = util.extend({}, OPTIONS, {base});
-
-    EA = new ElegantApi(options);
+    EA = new ElegantApi(OPTIONS);
 
     EA.request('userA', {uid: 3}, (err, data) => {
-      assert.ok(!err);
+      assert.ok(!err, 'no error happened');
       data.uid.should.eql(3);
       data.category.should.eql('A');
-      delete window.jQuery;
       done();
     });
   });
 
-  xit('should mock jquery post method', done => {
+  it('should mock jquery post method', done => {
     window.jQuery = $;
-    let options = util.extend({}, OPTIONS, {base});
-
-    EA = new ElegantApi(options);
+    EA = new ElegantApi(OPTIONS);
 
     EA.request('userB', {uid: 3}, (err, data) => {
       assert.ok(!err);
       data.uid.should.eql(3);
       data.category.should.eql('B');
-      delete window.jQuery;
       done();
     });
   });
 
-  xit('should mock jquery error status', done => {
+  it('should mock jquery error status', done => {
     window.jQuery = $;
-    let options = util.extend({}, OPTIONS, {base});
+    EA = new ElegantApi(OPTIONS);
 
-    EA = new ElegantApi(options);
-
-    EA.request('userS', {uid: 3}, (err, data) => {
-      assert.ok(err);
-      err.status.should.eql(-1);
-      delete window.jQuery;
-      done();
-    });
-  });
-
-  xit('should mock jquery request error', done => {
-    window.jQuery = $;
-    let options = util.extend({}, OPTIONS, {base});
-
-    EA = new ElegantApi(options);
-
-    EA.request('userA', {uid: 3, error: ''}, (err, data) => {
+    EA.request('userE', {uid: 3}, (err, data) => {
       assert.ok(err);
       err.status.should.eql(500);
-      delete window.jQuery;
+      err.responseText.should.match(/"message":"3"/);
+      done();
+    });
+  });
+
+  it('should proxy jquery get method', done => {
+    window.jQuery = $;
+    EA = new ElegantApi(util.extend(true, {}, OPTIONS, {mock: {proxy: OPTIONS._proxy}}));
+
+    let uid = Math.round(Math.random() * 1000 + 1);
+    EA.request('userA', {uid}, (err, data) => {
+      assert.ok(data, 'proxy should return data');
+      data.uid.should.eql(uid + '');
       done();
     });
   });
@@ -134,23 +126,4 @@ describe('ElegantApi on Server', () => {
     });
   });
 
-  it('should not emulateJSON when mock = "local"', done => {
-    let mockData = {timestamp: Date.now()};
-    let options = util.extend({}, OPTIONS, {
-      base: 'http://' + OPTIONS.mock + '/',
-      emulateJSON: true,
-      mock: 'local',
-      handler(http, callback) {
-        http.headers['Content-Type'].should.not.eql('application/x-www-form-urlencoded');
-        assert.deepEqual(http.data, {a: 'a', b: 'b'});
-        callback(null, mockData);
-      }
-    });
-
-    EA = new ElegantApi(options);
-    EA.api('notEmulateJSON', {method: 'POST'}, mockData);
-    EA.request('notEmulateJSON', {a: 'a', b: 'b'}, (err, data) => {
-      done();
-    });
-  });
 });

@@ -1,37 +1,36 @@
-var ElegantApi = require('../dist/elegant-api').ElegantApi;
+var base = require('./base');
+var proxy = require('./express-proxy');
 
-module.exports = function (baseOptions, mockOptions) {
+module.exports = function (mockOptions) {
 
-  var EA = new ElegantApi(baseOptions, mockOptions);
+  base.init(mockOptions);
 
   return function elegantApiExpressMiddleware(req, res, next) {
-    var eaQuery = req.query.__ea, eaCookie;
+    var http, eaData = req.query.__eaData, key = req.query.__ea;
 
-    if (!eaQuery) return next();
+    if (!key) return next();
 
-    eaQuery = eaQuery.split('|');
-    var key = eaQuery[0];
-    // var mock = eaQuery[1];
-
-    if (!req.cookies) {
-      console.warn('\n\x1b[33mYou should use cookie-parser middleware before elegant-api middleware.\x1b[0m\n');
+    if (!eaData && !req.cookies) {
+      base.writeWarn('\nYou should use `cookie-parser` middleware before elegant-api middleware.\n');
       return next();
     }
 
-    eaCookie = req.cookies['__ea' + key];
+    eaData = eaData || req.cookies['__ea' + key];
 
     try {
+      http = base.parse(eaData);
+    } catch (obj) {
+      return res.status(500).json(obj);
+    }
 
-      EA.responseMock(key, JSON.parse(eaCookie), function (err, data) {
-        if (err) {
-          res.status(500).json(err instanceof Error ? {error: err.message} : err);
-        } else {
-          res.json(data);
-        }
+    if (http.mock.proxy) {
+      proxy(http.mock.proxy, req, res, next);
+    } else {
+      base.mock(key, http, function (err, data) {
+        if (err) res.status(500).json(err);
+        else res.json(data);
       });
-
-    } catch (e) {
-      res.status(500).json({error: 'Parse http cookie error', cookie: eaCookie});
     }
   };
+
 };

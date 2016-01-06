@@ -10,8 +10,9 @@ export default {
 
   cache: 'smart', // 只有 GET 请求才会缓存，另外可以单独在 route 中指定 true 或者 false
 
-  mock: 'local', // false/local/[server_host:server_port]
+  mock: 'memory', // false/memory/local/{server, proxy}
   mockDelay: { min: 200, max: 3000 }, // 或者指定为一个具体的数字
+  dataTransformMethod: 'query', // query/cookie  cookie 只能用在没有独立的 mock server 的情况下，因为 cookie 无法跨域
 
   // 这里的设置不会被单独的 route 覆盖
   global: {
@@ -25,6 +26,7 @@ export default {
 
     method: 'GET',
     crossOrigin: false,
+    dataType: 'json',
     // url: null, // url 不用设置，会根据配置自动生成合适的值
     // body: null, // fetch api 标准是用 body
     data: null, // 而 jquery 用的是 data，这里兼容两者，设置的时候只需要设置 data 就行，系统会自动同步数据到 body
@@ -50,7 +52,7 @@ export default {
     let $ = window.jQuery && window.jQuery.ajax;
     if ($) {
       return $(http)
-        .success(data => callback(data))
+        .success(data => callback(null, data))
         .error(xhr => callback(xhr));
     }
 

@@ -2,7 +2,7 @@ import assert from 'should';
 import ElegantApi from '../src/ElegantApi';
 import OPTIONS from './server/options';
 
-OPTIONS.mock = 'local';
+OPTIONS.mock = 'memory';
 
 describe('ElegantApi Batch Request', () => {
 
@@ -28,6 +28,14 @@ describe('ElegantApi Batch Request', () => {
         assert.ok(err);
         assert.ok(data.userA);
         assert.ok(err.userE);
+        done();
+      });
+    });
+
+    it('should support alias', done => {
+      EA.request({A1: {uid: 1}, A2: {uid: 2}}, {alias: {A1: 'userA', A2: 'userA'}}, (err, data) => {
+        assert.ok(data.A1);
+        assert.ok(data.A2);
         done();
       });
     });

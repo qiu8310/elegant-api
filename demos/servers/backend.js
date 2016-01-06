@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-var USERS = require('./db').users;
+var USERS = require('../data/db').users;
 
 app.get('/api/users/:uid', function (req, res) {
   var uid = req.params.uid;

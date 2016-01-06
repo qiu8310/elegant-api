@@ -79,7 +79,7 @@ describe('util', () => {
     });
 
     it('should not iterate others', () => {
-      count = 0;
+      let count = 0;
       util.each(null, (val, key) => count++);
       util.each(true, (val, key) => count++);
       util.each(400, (val, key) => count++);

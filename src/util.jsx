@@ -53,6 +53,10 @@ function urlParams(obj) {
   return params.join('&');
 }
 
+function urlNormalize(url) {
+  return url.replace(/(?:[^:])\/\//g, '\/');
+}
+
 function _serialize(params, obj, scope) {
   let array = isArray(obj), plain = isObject(obj), hash;
 
@@ -78,5 +82,6 @@ export default {
   each,
   buildQuery,
   urlParams,
+  urlNormalize,
   emptyFunction
 };

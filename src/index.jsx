@@ -8,6 +8,7 @@ module.exports = function (httpOptions, mockOptions) {
     result[key] = (params, callback) => ea.request(key, params, callback);
   });
 
+  result.$ea = ea;
   result.$request = function () { ea.request.apply(ea, arguments); };
 
   return result;

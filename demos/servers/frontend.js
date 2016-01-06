@@ -18,7 +18,7 @@ app.use(express.static('../dist'));
 app.use(express.static('../node_modules/jquery/dist'));
 
 app.use(cookieParser());
-app.use(eaExpressMiddleware(require('../data/shared-options')));
+app.use(eaExpressMiddleware(require('../data/mocks')));
 
 
 app.get('/favicon.ico', function (req, res) {
@@ -33,5 +33,5 @@ app.all('*', function (req, res) {
 
 
 app.listen(3000, function () {
-  console.log('\nFrontend server listen on localhost:3000/\n');
+  console.log('\nFrontend server listen on localhost:3000\n');
 });
