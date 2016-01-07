@@ -13,9 +13,11 @@ app.use(function (req, res, next) {
 app.use(express.static('.'));
 app.use(express.static('./pages'));
 app.use(express.static('./data'));
-app.use(express.static('./data'));
 app.use(express.static('../dist'));
 app.use(express.static('../node_modules/jquery/dist'));
+app.use(express.static('../node_modules/bootstrap/dist'));
+app.use(express.static('../node_modules/angular/'));
+app.use(express.static('../node_modules/ladda/dist'));
 
 app.use(cookieParser());
 app.use(eaExpressMiddleware(require('../data/mocks')));
@@ -32,6 +34,6 @@ app.all('*', function (req, res) {
 });
 
 
-app.listen(3000, function () {
-  console.log('\nFrontend server listen on localhost:3000\n');
+app.listen(3100, function () {
+  console.log('\nFrontend server listen on localhost:3100\n');
 });

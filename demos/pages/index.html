@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html class="root zh" lang="zh">
+<html class="root zh" lang="zh" ng-app="EADemo">
 <head>
   <title>Elegant API Mock Demo</title>
   <meta charset="utf-8">
@@ -11,26 +11,151 @@
   <meta name="force-rendering" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+  <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css">
+  <link rel="stylesheet" type="text/css" href="ladda.min.css">
+
+  <link rel="stylesheet" type="text/css" href="static/index.css">
 </head>
 
 <body>
+
+  <nav class="navbar navbar-default">
+    <div class="container">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">Elegant API</a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li><a href="#">Users<span class="sr-only">(current)</span></a></li>
+          <!-- <li class="active"><a href="#">Link</a></li> -->
+        </ul>
+      </div><!-- /.navbar-collapse -->
+    </div><!-- /.container -->
+  </nav>
+
+  <div class="container" ng-controller="UserCtrl">
+    <button class="btn btn-info pull-right gap-down"
+      ng-click="add()"
+      data-toggle="modal"
+      data-target="#userModal">Add user</button>
+    <table class="table table-bordered table-hover">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Username</th>
+          <th>Gender</th>
+          <th>Birth Year</th>
+          <th style="width:160px;">Manipulate</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="user in users track by $index">
+          <td>{{user.uid}}</td>
+          <td>{{user.username}}</td>
+          <td>{{genders[user.gender]}}</td>
+          <td>{{user.year}}</td>
+          <td>
+            <a class="btn btn-primary btn-xs"
+              style="min-width:60px;"
+              data-toggle="modal"
+              data-target="#userModal"
+              ng-click="edit($event, user)">Edit</a>&nbsp;&nbsp;
+            <a class="btn btn-danger btn-xs"
+              style="min-width:60px;"
+              ng-disabled="user.isDeleting"
+              ng-click="delete(user, $index)">Delete{{user.isDeleting ? '...' : ''}}</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Modal -->
+    <div class="modal fade" id="userModal">
+      <form class="modal-dialog form-horizontal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            <h4 class="modal-title">{{target.uid === 0 ? 'Create' : 'Edit'}} user</h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="username" class="col-sm-3 control-label">User name</label>
+              <div class="col-sm-9">
+                <input type="text" class="form-control" id="username" ng-model="target.username" placeholder="User name">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="gender" class="col-sm-3 control-label">Gender</label>
+              <div class="col-sm-9">
+                <select class="form-control"
+                  ng-model="target.gender"
+                  id="gender">
+                  <option ng-repeat="(k, v) in genders"
+                    value="{{k}}"
+                    ng-selected="k === target.gender">{{v}}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="gender" class="col-sm-3 control-label">Birth year</label>
+              <div class="col-sm-9">
+                <select class="form-control"
+                  ng-model="target.year"
+                  ng-options="key for key in years track by key"
+                  id="gender">
+                </select>
+              </div>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="submit"
+              ng-click="submit(target)"
+              ng-disabled="isSubmiting"
+              class="btn btn-success">{{target.uid === 0 ? 'Create' : 'Save changes'}}{{isSubmiting ? '...' : ''}}</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+
+  </div>
+
+
+
+  <!-- 第三方库 -->
   <script type="text/javascript" src="jquery.js"></script>
+  <script type="text/javascript" src="js/bootstrap.js"></script>
+  <script type="text/javascript" src="spin.min.js"></script>
+  <script type="text/javascript" src="ladda.min.js"></script>
+  <script type="text/javascript" src="ladda.jquery.min.js"></script>
+  <script type="text/javascript" src="angular.js"></script>
+
+  <!-- 本项目发布后的文件 -->
   <script type="text/javascript" src="elegant-api.js"></script>
-  <script type="text/javascript" src="db.js"></script>
-  <script type="text/javascript" src="mocks.js"></script>
-  <script type="text/javascript" src="options.js"></script>
+
+  <!-- 配置项 -->
+  <script type="text/javascript" src="data/db.js"></script>
+  <script type="text/javascript" src="data/mocks.js"></script>
+  <script type="text/javascript" src="data/options.js"></script>
+
+  <!-- 主 JS -->
   <script type="text/javascript">
-
-  var api = elegantApi(OPTIONS, MOCKS);
-
-  api.getUser({uid: 1}, function (err, data1) {
-
-    // 第二次请求同一个接口应该缓存
-    api.getUser({uid: 1}, function (err, data2) {
-      console.log(data1.data, data2.data);
-    });
-
-  });
+  window.API = elegantApi(OPTIONS, MOCKS);
   </script>
+  <script type="text/javascript" src="static/index.js"></script>
 </body>
 </html>

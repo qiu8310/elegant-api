@@ -211,10 +211,12 @@ export default class ElegantApi {
   _map(source, target) {
     target.order.forEach(key => {
       let fnKey = '_apply' + key.charAt(0).toUpperCase() + key.slice(1);
+
       /* istanbul ignore else */
       if (fnKey in this) {
         source = this[fnKey](source, target[key]);
       }
+
     });
     return source;
   }
@@ -243,7 +245,11 @@ export default class ElegantApi {
     let {path, query, data, params} = this._applyUserParams(userParams, route);
     let http = util.extend(true, {}, route.http);
 
-    data = this._map(data, route.request);
+    if (['GET', 'HEAD', 'DELETE'].indexOf(http.method) >= 0) {
+      data = {};
+    } else {
+      data = this._map(data, route.request);
+    }
 
     http.params = params;
     http.query = query;
@@ -324,9 +330,10 @@ export default class ElegantApi {
       let {http, transformData} = this._generateRequestHttpAndTransformData(key, userParams, route);
       let cacheKey, cacheMap;
 
+      // 这时的 data 可能并不是一个对象，也有可能是个数组或其它
       let callback = (err, data) => {
         if (data) {
-          data = util.extend(true, {}, data); // 避免在 mock = memory 模式下，数据混乱
+          data = util.deepClone(data); // 避免在 mock = memory 模式下，数据混乱
           data = this._map(data, route.response);
         }
         cb(err, data);
@@ -341,7 +348,9 @@ export default class ElegantApi {
       }
 
       if (route.mock === 'memory') {
-        this._delay(route.mockDelay, () => mockResponse(this.mocks, key, transformData, callback));
+        this._delay(route.mockDelay, () => mockResponse(this.mocks, key, transformData, (error, data) => {
+          route.handler({error, data}, callback);
+        }));
       } else {
         route.handler(http, callback);
       }
@@ -406,6 +415,8 @@ export default class ElegantApi {
   }
 
   api(key, option, mockOption) {
+    option = util.isObject(option) ? option : {};
+
     // extend 之前要将 options 中的 query 和 data 转化成 Object
     this._normalizeRouteQueryAndData(option);
 

@@ -1,27 +1,17 @@
 var webpack = require('webpack');
 
-var isBuildEAServer = process.env.BUILD_EA_SERVER;
 var production = process.argv.indexOf('-p') > 0;
 var min = production ? '.min' : '';
 
-var entry, library;
-if (!isBuildEAServer) {
-  entry = {'elegant-api': './src/index.jsx'};
-  library = 'elegantApi';
-} else {
-  entry = {'elegant-api-server': './src/ElegantApiServer.jsx'};
-  library = 'ElegantApiServer';
-}
-
 var config = {
-  entry: entry,
+  entry: {'elegant-api': './src/index.jsx'},
 
-  devtool: production || isBuildEAServer ? null : 'source-map',
+  devtool: production ? null : 'source-map',
 
   output: {
     filename: '[name]' + min + '.js',
     path: './dist/',
-    library: library,
+    library: 'elegantApi',
     libraryTarget: 'umd'
   },
 

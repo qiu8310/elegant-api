@@ -111,10 +111,10 @@ describe('ElegantApi on Memory', () => {
       data.query.q2.should.eql('2');
       data.query.q3.should.eql('3333');
       data.query.q4.should.eql('4');
-      data.data.d1.should.eql('1');
-      data.data.d2.should.eql('2');
-      data.data.d3.should.eql('3333');
-      data.data.d4.should.eql('4');
+      // data.data.d1.should.eql('1');
+      // data.data.d2.should.eql('2');
+      // data.data.d3.should.eql('3333');
+      // data.data.d4.should.eql('4');
       done();
     });
   });
@@ -169,7 +169,7 @@ describe('ElegantApi on Memory', () => {
       http.should.have.properties(['ea', 'params', 'mock', 'query', 'data']);
 
       assert.deepEqual(http.query, {id: 1, apiversion: '1'});
-      assert.deepEqual(http.data, {ts: 'data field'});
+      assert.deepEqual(http.data, {});
 
       let id = http.query.id;
       if (USERS[id]) callback(null, USERS[id]);
@@ -313,12 +313,63 @@ describe('ElegantApi on Memory', () => {
     Object.keys(USERS).length.should.eql(3);
   });
 
-  it('should overwrite exists api', (done) => {
-    EA.api('user', {query: 'id=2', mockDelay: {min: 1, max: 5}}, USERS[2]);
+  it('should overwrite exists api', done => {
+    EA.api('user', {query: 'id=2', mockDelay: {min: 1, max: 5}, response: {naming: false}}, USERS[2]);
     EA.request('user', (err, data) => {
       assert.deepEqual(data, USERS[2]);
       assert.notEqual(data, USERS[2]);
       done();
+    });
+  });
+
+  context('should support response all kindof type', () => {
+    let mocks = {
+      int: 3,
+      null: null,
+      bool: false,
+      string: 'string',
+      array: [1, 'a', true]
+    };
+    let EA = new ElegantApi({
+      mockDelay: 10,
+      cache: false,
+      mocks,
+      routes: {int: true, null: true, bool: true, string: true, array: true}
+    });
+
+    it('should response int', done => {
+      EA.request('int', (err, data) => {
+        assert.deepEqual(data, mocks.int);
+        done();
+      });
+    });
+
+    it('should response null', done => {
+      EA.request('null', (err, data) => {
+        assert.deepEqual(data, mocks.null);
+        done();
+      });
+    });
+
+    it('should response bool', done => {
+      EA.request('bool', (err, data) => {
+        assert.deepEqual(data, mocks.bool);
+        done();
+      });
+    });
+
+    it('should response string', done => {
+      EA.request('string', (err, data) => {
+        assert.deepEqual(data, mocks.string);
+        done();
+      });
+    });
+
+    it('should response array', done => {
+      EA.request('array', (err, data) => {
+        assert.deepEqual(data, mocks.array);
+        done();
+      });
     });
   });
 });

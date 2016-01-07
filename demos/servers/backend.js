@@ -11,6 +11,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 var USERS = require('../data/db').users;
 
+app.all('*', function (req, res, next) {
+  console.log(req.url);
+  next();
+});
+
 app.get('/api/users/:uid', function (req, res) {
   var uid = req.params.uid;
 
@@ -26,12 +31,12 @@ app.get('/api/users', function (req, res) {
 app.post('/api/users', function (req, res) {
   var data = req.body;
   var result = {status: -2, message: 'ok', data: null};
-  if (!data.username) result.message = 'No username';
-  else if (!data.age) result.message = 'No age';
-  else if (!data.gender) result.message = 'No gender';
+  if (!data.user_name) result.message = 'No user_name';
+  else if (!data.user_age) result.message = 'No user_age';
+  else if (!data.sex) result.message = 'No sex';
   else {
     result.status = 0;
-    var user = {username: data.username, age: data.age, gender: data.gender};
+    var user = {user_name: data.user_name, user_age: data.user_age, sex: data.sex};
     var uid = 0;
     while (++uid) if (!USERS[uid]) break;
     user.uid = uid;
@@ -71,6 +76,6 @@ app.delete('/api/users/:uid', function (req, res) {
 
 
 
-app.listen(4000, function () {
-  console.log('\nBackend server listen on localhost:4000\n');
+app.listen(4100, function () {
+  console.log('\nBackend server listen on localhost:4100\n');
 });

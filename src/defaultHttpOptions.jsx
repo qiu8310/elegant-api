@@ -47,8 +47,10 @@ export default {
   },
 
   // 必需实现的一个方法，默认是调用 jquery 中的 ajax 方法的
-  // 如果 mock 值为 local 时，则不会调用此方法
+  // mock 对象： {isMemory: Boolean, data: Object, http: Object}
   handler(http, callback) {
+    if (this.mock === 'memory') return callback(http.error, http.data);
+
     let $ = window.jQuery && window.jQuery.ajax;
     if ($) {
       return $(http)
@@ -58,6 +60,31 @@ export default {
 
     throw new Error('Need implement handler function in options');
   },
+
+  /*
+  resources: {
+    user: {
+      uid: Number, // Number String Boolean null (其它类型不支持)
+      username: {
+        type: String,
+        alias: 'user_name'
+      },
+      year: {
+        type: Number,
+        read() {
+
+        },
+        write() {
+          return {age: 16};
+        }
+      },
+      gender: {
+        type: String,
+        default: 'M'
+      }
+    }
+  },
+  */
 
   routes: {
     /*

@@ -36,6 +36,20 @@ function extend() {
   return src;
 }
 
+function deepClone(obj) {
+  let result;
+  if (isObject(obj)) {
+    result = {};
+  } else if (Array.isArray(obj)) {
+    result = [];
+  } else {
+    return obj;
+  }
+
+  each(obj, (val, key) => result[key] = deepClone(val));
+  return result;
+}
+
 function buildQuery(query) {
   return Object.keys(query).reduce((result, key) => {
     result.push([key, query[key]].map(encodeURIComponent).join('='));
@@ -77,6 +91,7 @@ function _serialize(params, obj, scope) {
 
 export default {
   extend,
+  deepClone,
   isObject,
   isArray,
   each,

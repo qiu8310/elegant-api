@@ -35,9 +35,9 @@
     },
     createUser: function (http, cb) {
       var data = http.data;
-      if (!data.username || !data.age || !data.gender) return error('Absence arguments', cb);
+      if (!data.user_name || !data.user_age || !data.sex) return error('Absence arguments', cb);
 
-      var user = {username: data.username, age: data.age, gender: data.gender};
+      var user = {username: data.user_name, user_age: data.user_age, sex: data.sex};
       var uid = 0;
       while (++uid) if (!USERS[uid]) break;
       user.uid = uid;
@@ -53,9 +53,6 @@
         if (key !== 'uid' && key in http.data) user[key] = http.data[key];
 
       ok(user, cb);
-    },
-    foo: function (http, cb) {
-      cb(null, http);
     }
   };
 

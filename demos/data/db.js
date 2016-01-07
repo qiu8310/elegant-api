@@ -12,16 +12,16 @@
     users: {
       '1': {
         uid: 1,
-        username: 'Alex',
-        age: 19,
-        gender: 'M'
+        user_name: 'Alex',
+        user_age: 19,
+        sex: 'M'
       },
 
       '2': {
         uid: 2,
-        username: 'Liu Mei',
-        age: 16,
-        gender: 'W'
+        user_name: 'Liu Mei',
+        user_age: 16,
+        sex: 'F'
       }
     }
   };

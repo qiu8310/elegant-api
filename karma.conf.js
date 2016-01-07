@@ -2,13 +2,19 @@ var webpackConfig = require('./webpack.config');
 delete webpackConfig.entry;
 
 webpackConfig.devtool = 'cheap-inline-source-map';
-webpackConfig.module.postLoaders = [
-   {
-      test: /\.jsx$/,
-      exclude: /test|node_modules/,
-      loader: 'istanbul-instrumenter'
-    }
-];
+webpackConfig.module.postLoaders = [{
+  test: /\.jsx$/,
+  exclude: /test|node_modules/,
+  loader: 'istanbul-instrumenter'
+}];
+webpackConfig.module.loaders = [{
+  test: /\.jsx$/,
+  exclude: /node_modules/,
+  loader: 'babel-loader',
+  query: {
+    plugins: ['transform-runtime'] // 此 runtime 会增加文件尺寸，所以只在测试时候用，可以增加代码覆盖率
+  }
+}];
 
 
 module.exports = function (config) {
