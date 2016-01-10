@@ -1,8 +1,8 @@
-module.exports = function (mocks, key, http, callback) {
+module.exports = function (mocks, key, transformData, callback) {
   var mockTarget;
   if (key in mocks) {
     mockTarget = mocks[key];
-    if (typeof mockTarget === 'function') mockTarget(http, callback);
+    if (typeof mockTarget === 'function') mockTarget(transformData, callback);
     else callback(null, mockTarget);
   } else {
     callback({

@@ -322,54 +322,5 @@ describe('ElegantApi on Memory', () => {
     });
   });
 
-  context('should support response all kindof type', () => {
-    let mocks = {
-      int: 3,
-      null: null,
-      bool: false,
-      string: 'string',
-      array: [1, 'a', true]
-    };
-    let EA = new ElegantApi({
-      mockDelay: 10,
-      cache: false,
-      mocks,
-      routes: {int: true, null: true, bool: true, string: true, array: true}
-    });
 
-    it('should response int', done => {
-      EA.request('int', (err, data) => {
-        assert.deepEqual(data, mocks.int);
-        done();
-      });
-    });
-
-    it('should response null', done => {
-      EA.request('null', (err, data) => {
-        assert.deepEqual(data, mocks.null);
-        done();
-      });
-    });
-
-    it('should response bool', done => {
-      EA.request('bool', (err, data) => {
-        assert.deepEqual(data, mocks.bool);
-        done();
-      });
-    });
-
-    it('should response string', done => {
-      EA.request('string', (err, data) => {
-        assert.deepEqual(data, mocks.string);
-        done();
-      });
-    });
-
-    it('should response array', done => {
-      EA.request('array', (err, data) => {
-        assert.deepEqual(data, mocks.array);
-        done();
-      });
-    });
-  });
 });

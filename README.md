@@ -49,15 +49,66 @@
 
 ## TEST CASES
 
-* [ ] 支持 debug，并且可以单独对某一个 route 开启或关闭，同时可以将 debug 同步到后端 server
+* [ ] globals 属性只能在 commonOptions 中设置，子 route 中设置无效，可配置项是 
+      globals: {eaQueryPrefix, cacheSize, cacheMap, cacheStack}
+
+* [ ] routes/mocks/resources
+
+* [ ] 所有可以在子 route 中覆盖 commonOptions 的属性有：
+    - debug
+    - base/path
+    - emulateJSON/emulateHTTP
+    - cache
+    - mock: {memory: true, server: ..., proxy: ..., delay: {min: 100, max: 3000}}
+    - dataTransformMethod: query/cookie
+
+    - order
+    - alias/computed/naming/map
+    - namingDeep
+
+    - handler
+    - http：http 中所有属性可以直接在最外层的 commonOptions 中设置，系统会自动将支持的属性读取过来
+
+* [ ] route 中特有的属性
+    - request/response
+
+```
+resources: {
+  user: { // 如果没有设置 type，则 default 值为 null
+    uid: Number,
+    username: {
+      type: String,
+      alias: 'user_name'
+    },
+    gender: {
+      type: String,
+      default: 'M',
+      alias: 'sex'
+    },
+    age: {
+      type: Number,
+      read() {
+        return new Date().getFullYear() - this.age;
+      },
+      write() {
+        this.year = new Date().getFullYear() - this.age;
+        delete this.age
+      }
+    }
+  }
+}
+```
+
+
+* [ ] debug：并且可以单独对某一个 route 开启或关闭，同时可以将 debug 同步到后端 server
   - [ ] 确定 debug 需要输出哪些字段
+
 * [ ] 可以在共用 options 中设置 base 和 path，可以在 route 中覆盖它们，并且 http.url 是通过它们组装的，
       组装后要去掉 url 中的多余的反斜杠 "//"，但不要去掉 "http://" 里面的
-* [ ] emulateJSON：没有设置 crossOrigin 并且请求 method 的是 PUT|PATCH|DELETE 的情况下
+
 
 * [ ] GET/HEAD/DELETE 请求不用 body 字段
-* [ ] localstorage 中的 ea 字段
-* [ ]（功能分类测试，并且自动生成此列表）
+
 
 
 

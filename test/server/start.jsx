@@ -2,8 +2,8 @@
 import { spawn } from 'child_process';
 import path from 'path';
 
-import feServer from './fe';
-import rdServer from './rd';
+import feServer from './fe-server';
+import rdServer from './rd-server';
 
 let karmaBinFile = path.join(__dirname, '..', '..', 'node_modules', '.bin', 'karma');
 let testArgs = [karmaBinFile, 'start', '--no-auto-watch', '--single-run'];

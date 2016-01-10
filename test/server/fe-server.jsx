@@ -6,6 +6,7 @@ let app = require('express')();
 
 app.use(function (req, res, next) {
   res.append('Access-Control-Allow-Origin', '*');
+  console.log('fe-server:', req.url);
   next();
 });
 
@@ -13,7 +14,7 @@ app.use(cookieParser());
 app.use(eaExpressMiddleware(require('./options')));
 
 
-let path = OPTIONS.mock.server.replace(/^.*\/\//, '');
+let path = OPTIONS._server;
 let [host, port] = path.split(':');
 
 console.log('Config', OPTIONS.mock);

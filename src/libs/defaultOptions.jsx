@@ -10,12 +10,16 @@ export default {
 
   cache: 'smart', // 只有 GET 请求才会缓存，另外可以单独在 route 中指定 true 或者 false
 
-  mock: 'memory', // false/memory/local/{server, proxy}
-  mockDelay: { min: 200, max: 3000 }, // 或者指定为一个具体的数字
+  mock: {
+    memory: true, // 是否使用缓存来 mock
+    server: null, // 指定独立的 mock 服务器（需要 memory 为 false)
+    proxy: null, // 指定代理的服务器（需要 memory 为 false)
+    delay: { min: 200, max: 3000 } // 或者指定为一个具体的数字
+  },
   dataTransformMethod: 'query', // query/cookie  cookie 只能用在没有独立的 mock server 的情况下，因为 cookie 无法跨域
 
   // 这里的设置不会被单独的 route 覆盖
-  global: {
+  globals: {
     eaQueryPrefix: '__',
     cacheSize: 100,
     cacheMap: {},
@@ -23,7 +27,6 @@ export default {
   },
 
   http: {
-
     method: 'GET',
     crossOrigin: false,
     dataType: 'json',
@@ -38,22 +41,23 @@ export default {
 
   request: {
     naming: null,
-    order: ['alias', 'computed', 'map', 'naming']
+    namingDeep: 0,
+    order: ['resource', 'alias', 'computed', 'drop', 'map', 'naming']
   },
 
   response: {
     naming: 'camel', // 命名风格，可以为 camel/kebab/snake/cap 或自己实现，即指定一个 function
-    order: ['alias', 'computed', 'map', 'naming']
+    namingDeep: 0,
+    order: ['resource', 'alias', 'computed', 'drop', 'map', 'naming']
   },
 
-  // 必需实现的一个方法，默认是调用 jquery 中的 ajax 方法的
-  // mock 对象： {isMemory: Boolean, data: Object, http: Object}
-  handler(http, callback) {
-    if (this.mock === 'memory') return callback(http.error, http.data);
+  // 可能需要实现的一个方法，默认是调用 jquery 中的 ajax 方法的
+  handle(target, callback) {
+    if (this.mock.memory) return callback(target.error, target.data);
 
     let $ = window.jQuery && window.jQuery.ajax;
     if ($) {
-      return $(http)
+      return $(target.http)
         .success(data => callback(null, data))
         .error(xhr => callback(xhr));
     }
@@ -61,33 +65,13 @@ export default {
     throw new Error('Need implement handler function in options');
   },
 
+  mocks: {},
+  resources: {},
+  routes: {}
+
   /*
-  resources: {
-    user: {
-      uid: Number, // Number String Boolean null (其它类型不支持)
-      username: {
-        type: String,
-        alias: 'user_name'
-      },
-      year: {
-        type: Number,
-        read() {
-
-        },
-        write() {
-          return {age: 16};
-        }
-      },
-      gender: {
-        type: String,
-        default: 'M'
-      }
-    }
-  },
-  */
-
   routes: {
-    /*
+
     example: {
       // 所有 http 的属性都可以直接在这里写，会自动合并的 http 中
       method: 'POST',
@@ -151,6 +135,6 @@ export default {
         }
       }
     }
-    */
   }
+  */
 };

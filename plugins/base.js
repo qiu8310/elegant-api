@@ -8,7 +8,7 @@ function writeWarn() {
 }
 
 function writeError() {
-  process.stderr.write('\x1b[31m\x1b[91m'); // 防止有些系统不支持 92
+  if (process.env.NODE_ENV !== 'test') process.stderr.write('\x1b[31m\x1b[91m'); // 防止有些系统不支持 92
   console.error.apply(console, arguments);
   process.stderr.write('\x1b[0m');
 }

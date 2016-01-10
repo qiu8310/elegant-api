@@ -1,7 +1,7 @@
 var webpackConfig = require('./webpack.config');
 delete webpackConfig.entry;
 
-webpackConfig.devtool = 'cheap-inline-source-map';
+webpackConfig.devtool = 'inline-source-map';
 webpackConfig.module.postLoaders = [{
   test: /\.jsx$/,
   exclude: /test|node_modules/,
@@ -16,6 +16,10 @@ webpackConfig.module.loaders = [{
   }
 }];
 
+var plugins = Object.keys(require('./package').devDependencies).filter(function (k) {
+  return k.indexOf('karma-') === 0;
+});
+plugins.push({'middleware:custom': ['factory', require('./test/server/karma-middleware')]});
 
 module.exports = function (config) {
 
@@ -29,6 +33,9 @@ module.exports = function (config) {
     singleRun: process.env.CI ? true : false,
     autoWatch: process.env.CI ? false : true,
 
+    middleware: ['custom'],
+    plugins: plugins,
+
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
 
@@ -41,6 +48,7 @@ module.exports = function (config) {
     ],
 
     files: [
+      'node_modules/es6-promise/dist/es6-promise.js',
       'test/test*.jsx'
     ],
 
@@ -48,8 +56,9 @@ module.exports = function (config) {
     exclude: [],
 
     preprocessors: {
-      'test/**/test*.jsx': ['webpack'],
-      'src/**/*.jsx': ['coverage']
+      'test/**/test*.jsx': ['webpack', 'sourcemap'],
+      'src/**/*.jsx': ['coverage', 'sourcemap'],
+      'plugins/*.js': ['coverage', 'sourcemap']
     },
 
     webpack: webpackConfig,

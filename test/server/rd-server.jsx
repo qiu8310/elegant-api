@@ -4,17 +4,24 @@ let app = require('express')();
 
 app.use(function (req, res, next) {
   res.append('Access-Control-Allow-Origin', '*');
+  console.log('rd-server:', req.url);
   next();
 });
 
 
 app.all('*', function (req, res) {
   console.log(req.url, '\n');
-  res.json(req.query);
+  var result = {
+    url: req.url,
+    method: req.method,
+    query: req.query,
+    from: 'rd-server'
+  };
+  res.json(result);
 });
 
 
-let path = OPTIONS._proxy.replace(/^.*\/\//, '');
+let path = OPTIONS._proxy;
 let [host, port] = path.split(':');
 
 console.log('Config', {proxy: OPTIONS._proxy});

@@ -4,9 +4,10 @@ module.exports = {
 
   cache: 'smart',
 
-  mock: {server: 'http://127.0.0.1:9010'},
+  mock: {delay: 0, memory: false},
 
-  _proxy: 'http://127.0.0.1:9011', // 给内部用的，和配置没关系
+  _server: '127.0.0.1:9010', // 给内部用的，和配置没关系
+  _proxy: '127.0.0.1:9011',
 
   mockDelay: 10,
 
@@ -43,7 +44,7 @@ module.exports = {
       cb(null, {category: 'C', uid: parseInt(http.query.uid), timestamp: Date.now()});
     },
     userE(http, cb) {
-      cb(new Error(http.query.uid));
+      cb(new Error('Error with uid ' + http.query.uid));
     },
     userS(http, cb) {
       cb(null, {status: -1});
