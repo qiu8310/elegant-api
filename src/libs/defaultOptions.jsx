@@ -41,14 +41,15 @@ export default {
 
   request: {
     naming: null,
-    namingDeep: 0,
-    order: ['resource', 'alias', 'computed', 'drop', 'map', 'naming']
+    // 数组也会 extend，所以没有在这里定义，而是写在函数中
+    // order: ['resource', 'alias', 'computed', 'drop', 'map', 'naming']
   },
 
   response: {
-    naming: 'camel', // 命名风格，可以为 camel/kebab/snake/cap 或自己实现，即指定一个 function
-    namingDeep: 0,
-    order: ['resource', 'alias', 'computed', 'drop', 'map', 'naming']
+    naming: {
+      case: 'camel', // 命名风格，可以为 camel/kebab/snake/cap 或自己实现，即指定一个 function
+      deep: 0 // deep 默认就是 0，忽略此参数时，可以直接写成 naming: 'camel'
+    }
   },
 
   // 可能需要实现的一个方法，默认是调用 jquery 中的 ajax 方法的
@@ -68,73 +69,4 @@ export default {
   mocks: {},
   resources: {},
   routes: {}
-
-  /*
-  routes: {
-
-    example: {
-      // 所有 http 的属性都可以直接在这里写，会自动合并的 http 中
-      method: 'POST',
-
-      // key=固定的值   透传给后端
-      // key           此 key 是一个可选的参数
-      // key=          此 key 是一个必需要的参数
-      // key=:alias    此 key 的值是通过 alias 来传递进来的
-      query: 'action=GetUserInfo&ab&bar=&foo=:foos',
-
-      // 另外 query 和 data 还支持下面这种设置方法
-      data: {
-        userAge: {
-          required: true,
-          validate: /^\d+$/, // 或者 function
-          alias: 'age'
-        },
-        userName: { // 或者直接写 userName: 'Alex'
-          value: 'Alex'
-        }
-      },
-
-      cache: true,
-
-      request: {
-        // alias、computed 和 map 只针对 data，不针对 query，query 可以通过指定 path 实现
-        alias: {},
-        computed: {},
-        map() {}
-      },
-
-      response: {
-        // 先 alias => computed => map
-        alias: {
-          'data.total': 'userTotal', // 将 data 下的 key 为 total 的项转化成 userTotal
-          'data.list.[].user_name': 'username',
-          data: {
-            size: 'length',  // 只有 data 下的 size 会被替换成 length
-            list: {
-              '[]': {
-                user_sex: 'gender' // data.list 是个数组，数组中的每一项中的 key 为 user_sex 的项都会被替换成 gender
-              }
-            }
-          }
-        },
-
-        computed: {
-          // 在 data 中定义一个 length 属性，有下面两种不同的实现方法：
-          'data.length': function (currentObj, rootObj) {
-            return currentObj.size;
-          },
-          data: {
-            length() {
-              return 5;
-            }
-          }
-        },
-
-        map(rootObj) {
-          return rootObj;
-        }
-      }
-    }
-  }
-  */
 };

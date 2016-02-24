@@ -310,7 +310,6 @@ export function formatRealtimeRoute(route, userArgs) {
  *  }
  */
 export function formatResource(resource, resourceKey) {
-  resource.name = resourceKey;
   return Object.keys(resource).reduce((result, key) => {
 
     let definition = resource[key],
@@ -341,6 +340,27 @@ export function formatResource(resource, resourceKey) {
 
     // TODO 验证 read/write 为 function， alias 为字符串 （当它们不为 null 时）
 
+    // read 表示从 response 中读取数据， write 当前写入到 request 中
     result[key] = {type, alias, defaultValue, read, write};
+    return result;
   }, {});
+}
+
+
+/**
+ * 将 resource 反转
+ *
+ * 上面函数返回的值是给 resquest 时用的，此函数返回的是给 response 用的
+ */
+export function reverseResource(resource, resourceKey) {
+  let result = {};
+
+  util.each(resource, function (config, key) {
+    let {type, alias, defaultValue, read, write} = config;
+    if (alias) [key, alias] = [alias, key];
+    [read, write] = [write, read];
+    result[key] = {type, alias, defaultValue, read, write};
+  });
+
+  return result;
 }

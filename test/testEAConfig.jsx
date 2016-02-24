@@ -61,9 +61,12 @@ describe('EA Config', () => {
       assert.ok(!EA.apis.foo);
     });
 
-    it('should throws when request a not exists route name', () => {
+    it('should throws when request a not exists route name', done => {
       EA = new ElegantApi();
-      assert.throws(() => EA.request('foo'), /Request key 'foo' not exists/);
+      EA.request('foo').catch(err => {
+        err.message.should.match(/Request key 'foo' not exists/);
+        done();
+      });
     });
   });
 
@@ -99,6 +102,7 @@ describe('EA Config', () => {
         },
         routes: {
           foo: {
+            // __search 表示 location.search 参数（只在测试环境下有效）
             __search: '__abc=' + random
           },
           bar: {}
@@ -411,7 +415,7 @@ describe('EA Config', () => {
       });
       EA.request('foo', {resource: 'dogs'});
     });
-    it('should throws when config variable not provide', () => {
+    it('should throws when config variable not provide', done => {
       EA = new ElegantApi({
         mock: MOCK,
         base: '/api/users',
@@ -421,7 +425,10 @@ describe('EA Config', () => {
           }
         }
       });
-      assert.throws(() => EA.request('foo'), /Route foo missing params parameter/);
+      EA.request('foo').catch(err => {
+        err.message.should.match(/Route foo missing params parameter/);
+        done();
+      });
     });
   });
 
@@ -462,11 +469,12 @@ describe('EA Config', () => {
         }
       });
 
-      assert.throws(() => EA1.request('foo'), /Route foo missing query parameter: id/);
-      assert.throws(() => EA2.request('foo'), /Route foo missing data parameter: id/);
+      EA1.request('foo').catch(err => err.message.should.match(/Route foo missing query parameter: id/));
+      EA2.request('foo').catch(err => err.message.should.match(/Route foo missing data parameter: id/));
 
-      assert.throws(() => EA1.request('foo', {id: 1}), /Route foo missing query parameter: q3/);
-      assert.throws(() => EA2.request('foo', {id: 1}), /Route foo missing data parameter: q3/);
+
+      EA1.request('foo', {id: 1}).catch(err => err.message.should.match(/Route foo missing query parameter: q3/));
+      EA2.request('foo', {id: 1}).catch(err => err.message.should.match(/Route foo missing data parameter: q3/));
 
       EA1.request('foo', {id: 1, q3: '3'}).then(trans => {
         trans.query.q1.should.eql(1);
@@ -500,9 +508,14 @@ describe('EA Config', () => {
         }
       });
 
-      assert.throws(() => EA.request('foo', {fn: '1', reg: 'a'}), /Route foo query parameter 'reg' validate error/);
-      assert.throws(() => EA.request('foo', {fn: 'a', reg: '1'}), /Route foo query parameter 'fn' validate error/);
-      done();
+      EA.request('foo', {fn: '1', reg: 'a'}).catch(e => {
+        e.message.should.match(/Route foo query parameter 'reg' validate error/);
+
+        return EA.request('foo', {fn: 'a', reg: '1'});
+      }).catch(e => {
+        e.message.should.match(/Route foo query parameter 'fn' validate error/);
+        done();
+      });
     });
 
     it('should support alias in build query or data', done => {
@@ -542,8 +555,11 @@ describe('EA Config', () => {
         mocks:{foo: 'foo'}
       });
 
-      assert.throws(() => EA.request('foo', {id: 3}), /Route foo missing query parameter: type/);
-      EA.request('foo', {id: 3, type: 'users'});
+      EA.request('foo', {id: 3}).catch(e => {
+        e.message.should.match(/Route foo missing query parameter: type/);
+        EA.request('foo', {id: 3, type: 'users'});
+      });
+
     });
 
     it('http.data should be empty when http.method is GET, HEAD or DELETE', done => {

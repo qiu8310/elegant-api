@@ -6,7 +6,8 @@ import {
   formatRootOptions,
   formatInitialRoute,
   formatRealtimeRoute,
-  formatResource
+  formatResource,
+  reverseResource
 } from './libs/Formater';
 
 import mockResponse from '../plugins/mock';
@@ -32,18 +33,109 @@ export default class ElegantApi {
     this.routes = util.mapObject(routes, (route, key) =>
       formatInitialRoute(key, util.objectify(route), rootOptions));
     this.resources = util.mapObject(resources, formatResource);
+    this.responseResources = util.mapObject(this.resources, reverseResource);
     this.mocks = mockOptions || mocks;
     this.apis = {};
     util.each(this.routes, route => this.apis[route.name] = this._generateApi(route));
   }
 
-  applyResource() {}
-  applyAlias() {}
-  applyComputed() {}
-  applyDrop() {}
-  applyMap() {}
-  applyNaming() {}
-  apply(data, config) { return data; }
+  // 下面几个以 _apply 全是 _transform 相关的函数
+  _apply(source, config, type) {
+    let order = config.order || ['resource', 'alias', 'computed', 'drop', 'map', 'naming'];
+    order.forEach(key => {
+      let fnKey = '_apply' + key.charAt(0).toUpperCase() + key.slice(1);
+
+      if (fnKey in this) {
+        source = this[fnKey](source, config[key], type);
+      }
+    });
+    return source;
+  }
+  _applyResource(source, config, type) {
+    if (!config) return source;
+
+    let map = Object.keys(config).reduce((map, rKey) => {
+      let resource = this.resources[rKey];
+      let paths = [].concat(config[rKey]);
+      if (!resource) throw new Error(`Resource ${rKey} not exists.`);
+
+      paths.forEach(path => {
+        resolveRefs(source, path).forEach(ref => {
+          if (util.isObject(ref)) this[`_${type}Resource`](ref, resource, rKey);
+        });
+      });
+      return map;
+    }, {});
+    return source;
+  }
+
+  // 不需要返回，obj 是引用
+  _requestResource(obj, resource) {
+    let removes = [];
+    util.each(resource, (conf, key) => {
+      let oldVal = obj[key];
+      let aliasKey = key;
+
+      if (conf.alias && conf.alias !== key) {
+        removes.push(key);
+        aliasKey = conf.alias;
+      }
+
+      if (oldVal == null) oldVal = conf.defaultValue;
+
+      obj[aliasKey] = conf.write ? conf.write.call(obj, oldVal) : oldVal;
+
+    });
+
+    util.each(removes, (key) => delete obj[key]);
+  }
+
+  _responseResource(obj, resource, resourceKey) {
+    resource = this.responseResources[resourceKey];
+    this._requestResource(obj, resource);
+  }
+
+  _applyAlias(source, rules) {
+    walk(source, rules, (ref, path, last, ruleValue) => {
+      if (typeof ruleValue !== 'string')
+        throw new SyntaxError('Expect string value for alias.');
+      if (last in ref) {
+        ref[ruleValue] = ref[last];
+        delete ref[last];
+      }
+    });
+    return source;
+  }
+  _applyComputed(source, rules) {
+    walk(source, rules, (ref, path, last, ruleValue) => {
+      if (typeof ruleValue !== 'function')
+        throw new SyntaxError('Expect function value for computed.');
+      ref[last] = ruleValue.call(ref, ref, source);
+    });
+    return source;
+  }
+  _applyDrop(source, rules) {
+    if (typeof rules === 'string') rules = {[rules]: true};
+    else if (util.isArray(rules)) rules = rules.reduce((r, k) => { r[k] = true; return r; }, {});
+    // @TODO 可能是一个含有数组的对象
+    if (util.isObject(rules)) {
+      walk(source, rules, (ref, path, last) => {
+        /* istanbul ignore else */
+        if (last in ref) delete ref[last];
+      });
+    }
+    return source;
+  }
+  _applyMap(source, mapFn) {
+    return typeof mapFn === 'function' ? mapFn(source) : source;
+  }
+  _applyNaming(source, config) {
+    if (typeof config === 'string') config = {case: config};
+    if (!util.isObject(config)) return source;
+    config.naming = config.case;
+    return transform(source, config);
+  }
+
 
   /**
    * 中间件：判断是否需要使用缓存
@@ -59,7 +151,7 @@ export default class ElegantApi {
     let {cacheSize, cacheMap, cacheStack} = this.globals;
 
     if (cacheKey in cacheMap) {
-      cb(null, util.deepClone(cacheMap[cacheKey])); // 要深拷贝，防止用户修改返回的数据
+      cb(null, cacheMap[cacheKey]);
       return false;
     } else {
       return (err, data) => {
@@ -84,11 +176,17 @@ export default class ElegantApi {
    */
   _transform(route, cb) {
     let http = route.http;
-    http.data = this.apply(http.data, route.request);
+    http.data = this._apply(http.data, route.request, 'request');
 
     return (err, data) => {
-      if (!err) data = this.apply(data, route.response);
-      cb(err, data);
+      if (err) return cb(err, data);
+      try {
+        // 要深拷贝，防止用户修改返回的数据
+        data = this._apply(util.deepClone(data), route.response, 'response');
+        cb(err, data);
+      } catch (err) {
+        cb(err);
+      }
     }
   }
 
@@ -124,7 +222,12 @@ export default class ElegantApi {
   _generateApi(route) {
     return (userArgs, cb) => {
       // 返回的是一个全新的 route，其中 route.http.{path, params, query, data} 都是计算后的
-      route = formatRealtimeRoute(route, userArgs);
+      try {
+        route = formatRealtimeRoute(route, userArgs);
+      } catch (e) {
+        return cb(e);
+      }
+
 
       let {mock, http} = route;
       cb = this._transform(route, cb);
@@ -153,23 +256,7 @@ export default class ElegantApi {
       }
 
       this._emulate(route);
-      if (window.Promise) {
-        return new Promise((resolve, reject) => {
-          this._response(route, transformData, this._promisify(cb, resolve, reject));
-        });
-      } else {
-        this._response(route, transformData, cb);
-      }
-
-    };
-  }
-
-  // 同时执行 promise 和 callback，所以在使用的时候只要使用一种方法即可
-  _promisify(cb, resolve, reject) {
-    return (err, data) => {
-      if (err) reject(err);
-      else resolve(data);
-      cb(err, data);
+      this._response(route, transformData, cb);
     };
   }
 
@@ -225,19 +312,78 @@ export default class ElegantApi {
     params = util.objectify(params);
     if (typeof callback !== 'function') callback = util.emptyFunction;
 
+    let end = callback => {
+      if (typeof source === 'string') return this._singleRequest(source, params, callback);
+      else if (util.isArray(source)) return this._batchSeriesRequest(source, params, callback);
+      else if (util.isObject(source)) return this._batchParallelRequest(source, params, callback);
 
-    if (typeof source === 'string') return this._singleRequest(source, params, callback);
-    else if (util.isArray(source)) return this._batchSeriesRequest(source, params, callback);
-    else if (util.isObject(source)) return this._batchParallelRequest(source, params, callback);
+      callback(new SyntaxError('Illegal arguments.'));
+    };
 
-    throw new SyntaxError('Illegal arguments.');
+    if (window.Promise) {
+      return new Promise((resolve, reject) => {
+        end((err, data) => {
+          if (err) reject(err);
+          else resolve(data);
+          callback(err, data);
+        });
+      });
+    } else {
+      end(callback);
+    }
   }
 
   _singleRequest(key, params, callback) {
     if (this.apis[key]) return this.apis[key](params, callback);
-    throw new Error(`Request key '${key}' not exists.`);
+    callback(new Error(`Request key '${key}' not exists.`));
   }
 
   _batchSeriesRequest() {}
   _batchParallelRequest() {}
+}
+
+/**
+ * 遍历指定的规则，主要用在 _applyAlias 和 _applyComputed 中
+ */
+function walkRules(rules, cb, prefix) {
+  for (let key in rules) {
+    let path = prefix ? prefix + '.' + key : key;
+    if (util.isObject(rules[key])) {
+      walkRules(rules[key], cb, path);
+    } else {
+      cb(path, rules[key]);
+    }
+  }
+}
+
+function resolveRefs(source, path) {
+  let refs = [source];
+  if (!path) return refs;
+
+  path.split('.').forEach(key => {
+    let tmp = [];
+    refs.forEach(r => {
+      /* istanbul ignore else */
+      if (r) {
+        if (key === '[]' && Array.isArray(r)) {
+          tmp = tmp.concat(r);
+        } else {
+          tmp.push(r[key]);
+        }
+      }
+    });
+    refs = tmp;
+  });
+
+  return refs.filter(r => r);
+}
+
+function walk(source, rules, cb) {
+  walkRules(util.objectify(rules), (path, ruleValue) => {
+    let parts = path.split('.');
+    let last = parts.pop();
+    path = parts.join('.');
+
+    resolveRefs(source, path).forEach(ref => cb(ref, path, last, ruleValue));
+  });
 }

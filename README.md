@@ -2,6 +2,17 @@
 
 优雅的定义 API 接口
 
+## 开发
+
+* Watch Mode
+
+  - npm run test-fe-server
+  - npm run test-rd-server
+  - npm run test-watch
+
+* Single Run Mode
+
+  - npm run test
 
 ## 使用
 
