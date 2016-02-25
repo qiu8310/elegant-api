@@ -14,6 +14,10 @@
 </head>
 
 <body>
+  <div id="test"></div>
+
+  <script type="text/javascript" src="http://cdn.staticfile.org/json2/20150503/json2.js"></script>
+  <script type="text/javascript" src="es5-shim.js"></script>
   <script type="text/javascript" src="jquery.js"></script>
   <script type="text/javascript" src="elegant-api.js"></script>
 
@@ -29,7 +33,8 @@
     getUser: {uid: 10},
     getAllUsers: {}
   }, function (errorMap, dataMap) {
-    console.log(errorMap, dataMap);
+    $('#test').append('<div>errorMap: ' + JSON.stringify(errorMap) + '</div>')
+    $('#test').append('<div>dataMap: ' + JSON.stringify(dataMap) + '</div>')
   });
 
   </script>
