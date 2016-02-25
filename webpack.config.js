@@ -42,7 +42,7 @@ var config = {
 
   module: {
     loaders: [
-      { test: /\.jsx$/, exclude: /node_modules/, loader: 'babel-loader'}
+      { test: /\.jsx$/, exclude: /node_modules/, loaders: ['es3ify', 'babel']}
     ]
   }
 };

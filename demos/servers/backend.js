@@ -4,6 +4,11 @@ var cookieParser = require('cookie-parser');
 var express = require('express');
 var app = express();
 
+app.use(function (req, res, next) {
+  res.append('Access-Control-Allow-Origin', '*');
+  next();
+});
+
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

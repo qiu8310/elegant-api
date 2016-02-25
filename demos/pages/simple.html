@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<html class="root zh" lang="zh" ng-app="EADemo">
+<head>
+  <title>Elegant API Mock Simple Demo</title>
+  <meta charset="utf-8">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  <meta name="author" content="qiuzhongleiabc@126.com">
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1">
+
+</head>
+
+<body>
+  <div id="test"></div>
+  <script type="text/javascript" src="http://cdn.staticfile.org/json2/20150503/json2.js"></script>
+  <script type="text/javascript" src="es5-shim.js"></script>
+  <script type="text/javascript" src="jquery.js"></script>
+  <script type="text/javascript" src="elegant-api.js"></script>
+  <script type="text/javascript">
+
+  var api = elegantApi({
+    mock: {
+      disabled: false,
+      memory: true,
+      delay: {min: 10, max: 100} // 接口返回数据的延时
+    },
+
+    handle: function (target, callback) {
+      console.debug('handle target', target.http.url, target);
+      if (this.mock.memory) return callback(target.error, target.data);
+
+      return $.ajax(target.http)
+        .success(function (data) { callback(null, data); })
+        .error(function (xhr) { callback(xhr); });
+    },
+
+    base: 'http://localhost:4100/api',
+    query: 'apiVersion=1', // 全局的 query 参数
+
+    routes: {
+      getUser: {
+        path: '/users/:uid',
+        query: 'paramA=xxx&paramB' // paramA 默认值是 xxx, paramB 是一个可选的参数
+      },
+      createUser: {
+        method: 'post',
+        path: '/users',
+        data: 'username=&email=' // 约束必须带这两个参数（也可以不约束，则所有所有都会当作 post data）
+      }
+    },
+
+    mocks: {
+      getUser: {
+        status: 0,
+        message: 'ok',
+        data: {
+          uid: 1,
+          username: 'Mora',
+          email: 'mora@xx.com'
+        }
+      },
+      createUser: {
+        staus: 0,
+        message: 'ok',
+        data: null
+      }
+    }
+  });
+
+
+  api.getUser({uid: 1}, function (err, data) {
+    $('#test').append('<div>getUser: ' + JSON.stringify(data) + '</div>')
+  });
+
+
+  api.createUser({username: 'xxx', email: 'xxx@xxx.com'}, function (err, data) {
+    $('#test').append('<div>createUser: ' + JSON.stringify(data) + '</div>')
+  });
+
+
+  </script>
+</body>
+</html>

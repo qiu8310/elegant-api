@@ -117,7 +117,10 @@ export function formatInitialRoute(routeKey, route, formatedRootOptions) {
 
   // debug
   mock.debug = route.debug;
-  if (mock.memory) {
+  if (mock.disabled) {
+    delete mock.memory;
+  }
+  if (mock.disabled || mock.memory) {
     delete mock.server;
     delete mock.proxy;
   }
@@ -181,7 +184,7 @@ function getDelayTime(delay) {
  */
 function parseUserArgs(userArgs, route) {
   userArgs = util.extend(true, {}, userArgs);
-  let keys = Object.keys(userArgs);
+  let keys = util.objectKeys(userArgs);
   let http = route.http;
 
   let allows = ['params', 'query', 'data'];
@@ -194,7 +197,7 @@ function parseUserArgs(userArgs, route) {
   }
 
   // query 和 data 可能有 alias 字段
-  let queryKeys = Object.keys(route.query);
+  let queryKeys = util.objectKeys(route.query);
   let paramKeys = getParamKeysFromPath(http.path);
   let params = {}, query = {}, data = {};
 
@@ -310,7 +313,7 @@ export function formatRealtimeRoute(route, userArgs) {
  *  }
  */
 export function formatResource(resource, resourceKey) {
-  return Object.keys(resource).reduce((result, key) => {
+  return util.objectKeys(resource).reduce((result, key) => {
 
     let definition = resource[key],
       definitionType = typeof definition;

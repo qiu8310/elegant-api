@@ -1,10 +1,10 @@
 var OPTIONS = {
-  mock: {proxy: false, server: false},
-  mockDelay: {min: 200, max: 1000}, // 只有 mock 为 memory 时才起作用
+  mock: {memory: true, delay: {min: 200, max: 1000}},
+
   base: '/api',
 
-  handler: function (http, cb) {
-    if (this.mock === 'memory') {
+  handle: function (http, cb) {
+    if (this.mock.memory) {
       if (http.error) return cb(http.error);
       return filter(http.data);
     }
@@ -67,6 +67,18 @@ var OPTIONS = {
             return new Date().getFullYear() - user.year;
           }
         }
+      },
+      response: {
+        alias: {
+          user_name: 'username',
+          user_age: 'age',
+          sex: 'gender'
+        },
+        computed: {
+          year: function (user) {
+            return new Date().getFullYear() - user.age;
+          }
+        }
       }
     },
     updateUser: {
@@ -80,6 +92,18 @@ var OPTIONS = {
         computed: {
           user_age: function (user) {
             return new Date().getFullYear() - user.year;
+          }
+        }
+      },
+      response: {
+        alias: {
+          user_name: 'username',
+          user_age: 'age',
+          sex: 'gender'
+        },
+        computed: {
+          year: function (user) {
+            return new Date().getFullYear() - user.age;
           }
         }
       }

@@ -4,6 +4,16 @@
 export function emptyFunction() {}
 
 /**
+ * 获取对象中的 keys，兼容 IE 7/8
+ *
+ * @param  {Object} obj
+ * @return {Array}
+ */
+export function objectKeys(obj) {
+  return obj ? Object.keys(obj) : [];
+}
+
+/**
  * 调用 Object 原型链上的 toString 方法来获取任意变量的原生的 string 形式
  * @param  {*} o 任意变量
  * @return {String}
@@ -40,7 +50,7 @@ export function each(obj, cb) {
   if (isArray(obj)) {
     for (let i = 0; i < obj.length; i++) cb(obj[i], i, obj);
   } else if (isObject(obj)) {
-    Object.keys(obj).forEach(key => cb(obj[key], key, obj));
+    objectKeys(obj).forEach(key => cb(obj[key], key, obj));
   }
 }
 
@@ -51,7 +61,7 @@ export function each(obj, cb) {
  * @return {Object}
  */
 export function mapObject(obj, fn) {
-  return Object.keys(obj).reduce((result, key) => {
+  return objectKeys(obj).reduce((result, key) => {
     result[key] = fn(obj[key], key, obj);
     return result;
   }, {});

@@ -3,6 +3,8 @@ export default {
   debug: true, // 开启调试模式
   base: '', // 指定基准路径，这样在单独的 route 中只要指定不同的部分即可
   path: '',
+  // query: 'a=:aa&b=',  // 需要参数 `aa` and `b`
+  // data: 'c&d=&e=eee', // 需要参数 `d`，参数 `c` 是可选的，参数 `e` 的默认值是 "eee"
 
   // 来自于 vue-resource
   emulateJSON: false,
@@ -11,10 +13,11 @@ export default {
   cache: 'smart', // 只有 GET 请求才会缓存，另外可以单独在 route 中指定 true 或者 false
 
   mock: {
+    // disabled: false, // 是否禁用 mock
     memory: true, // 是否使用缓存来 mock
     server: null, // 指定独立的 mock 服务器（需要 memory 为 false)
     proxy: null, // 指定代理的服务器（需要 memory 为 false)
-    delay: { min: 200, max: 3000 } // 或者指定为一个具体的数字
+    delay: { min: 200, max: 1000 } // 或者指定为一个具体的数字
   },
   dataTransformMethod: 'query', // query/cookie  cookie 只能用在没有独立的 mock server 的情况下，因为 cookie 无法跨域
 
@@ -56,9 +59,9 @@ export default {
   handle(target, callback) {
     if (this.mock.memory) return callback(target.error, target.data);
 
-    let $ = window.jQuery && window.jQuery.ajax;
-    if ($) {
-      return $(target.http)
+    let ajax = window.jQuery && window.jQuery.ajax;
+    if (ajax) {
+      return ajax(target.http)
         .success(data => callback(null, data))
         .error(xhr => callback(xhr));
     }

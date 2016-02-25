@@ -14,6 +14,7 @@ app.use(express.static('.'));
 app.use(express.static('./pages'));
 app.use(express.static('./data'));
 app.use(express.static('../dist'));
+app.use(express.static('../node_modules/es5-shim'));
 app.use(express.static('../node_modules/jquery/dist'));
 app.use(express.static('../node_modules/bootstrap/dist'));
 app.use(express.static('../node_modules/angular/'));

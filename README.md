@@ -21,12 +21,12 @@
 ## 特点
 
 1. 六种开发模式
-  * **MEMORY 模式：** 无后端，无服务器，后端数据通过前端直接 mock (`mock = 'memory'`)
-  * **REMOTE 模式：** 在 local 服务器上嵌入 mock 服务器，数据从 mock 服务器生成 (`mock = {proxy: false}`)
+  * **MEMORY 模式：** 无后端，无服务器，后端数据通过前端直接 mock (`mock = {memory: true}`)
+  * **REMOTE 模式：** 在 local 服务器上嵌入 mock 服务器，数据从 mock 服务器生成 (`mock = {memory: false}`)
   * **PROXY  模式：** 在 local 服务器上嵌入 proxy 服务器，后端数据通过代理服务器传给前端 (`mock = {proxy: 'http://backend.server.com'`)
   * **REMOTE STANDALONE 模式：** 使用一个独立的 mock 服务器 (`mock = {server: 'http://mock.server.com'`)
   * **PROXY  STANDALONE 模式：** 使用一个独立的 proxy 服务器 (`mock = {server: 'http://mock.server.com', proxy: 'http://backend.server.com'`)
-  * **ONLINE 模式：** 线上模式，无任何 mock (`mock = false`)
+  * **ONLINE 模式：** 线上模式，无任何 mock (`mock = {disabled: true}`)
 2. **alias：** 可以对 request data 或 response data 中的字段取别名
 3. **map：** 可以返回一个新的 request data 或 response data
 4. **computed：** 可以在 request data 或 response data 生成新的字段
@@ -40,6 +40,7 @@
 
 ## mock 或 proxy 服务的使用
 
+* 参见 [demos](./demos/pages/)
 
 ## 依赖
 
@@ -56,7 +57,7 @@
 * [ ] 支持定义 resource 
 * [ ] 自动生成后端的 api 文档 https://sample-threes.readme.io/docs/orders
 * [ ] monk server 支持永久修改 db 数据
-* [ ] 加入 Promise
+* [ ] 加入 Promise 支持
 
 ## TEST CASES
 

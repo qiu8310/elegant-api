@@ -10,7 +10,7 @@
     "test-rd-server": "NODE_ENV=test babel-node ./test/server/rd-server.jsx",
     "test-watch": "NODE_ENV=test karma start",
     "test": "NODE_ENV=test babel-node --plugins transform-runtime ./test/server/start.jsx",
-    "pub": "NODE_ENV=production webpack && NODE_ENV=production webpack -p"
+    "build": "NODE_ENV=production webpack && NODE_ENV=production webpack -p"
   },
   "files": [
     "dist/",
@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/qiu8310/elegant-api#readme",
   "dependencies": {
-    "naming-transform": "0.0.7",
+    "naming-transform": "0.0.8",
     "raw-body": "^2.1.5"
   },
   "devDependencies": {
@@ -42,13 +42,18 @@
     "babel-cli": "^6.3.17",
     "babel-core": "^6.3.26",
     "babel-loader": "^6.2.0",
+    "babel-plugin-transform-es3-member-expression-literals": "^6.3.13",
+    "babel-plugin-transform-es3-property-literals": "^6.3.13",
     "babel-plugin-transform-runtime": "^6.4.0",
-    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-es2015": "^6.5.0",
+    "babel-preset-es2015-loose": "^7.0.0",
     "babel-preset-stage-0": "^6.3.13",
     "babel-runtime": "^6.3.19",
     "body-parser": "^1.14.2",
     "bootstrap": "^3.3.6",
     "cookie-parser": "^1.4.0",
+    "es3ify-loader": "^0.1.0",
+    "es5-shim": "^4.5.5",
     "es6-promise": "^3.0.2",
     "express": "^4.13.3",
     "istanbul-instrumenter-loader": "^0.1.3",

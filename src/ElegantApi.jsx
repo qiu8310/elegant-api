@@ -1,7 +1,9 @@
 import transform from 'naming-transform';
+import defaultOptions from './libs/defaultOptions';
 
 const util = require('./libs/util');
-import defaultOptions from './libs/defaultOptions';
+const mockResponse = require('../plugins/mock');
+
 import {
   formatRootOptions,
   formatInitialRoute,
@@ -10,14 +12,18 @@ import {
   reverseResource
 } from './libs/Formater';
 
-import mockResponse from '../plugins/mock';
 
-let STORAGE = window.localStorage /* istanbul ignore next */ || {};
+let STORAGE;
+try { // IE 8 下直接调用 window.localStorage 会报错
+  localStorage.setItem('_ea', '_ea');
+  localStorage.removeItem('_ea');
+  STORAGE = localStorage;
+} catch (e) { STORAGE = {}; }
 
 /**
  * @class ElegantApi
  */
-export default class ElegantApi {
+module.exports = class ElegantApi {
   constructor(options, mockOptions) {
     let rootOptions = util.extend(true, {}, defaultOptions, options);
 
@@ -54,7 +60,7 @@ export default class ElegantApi {
   _applyResource(source, config, type) {
     if (!config) return source;
 
-    let map = Object.keys(config).reduce((map, rKey) => {
+    let map = util.objectKeys(config).reduce((map, rKey) => {
       let resource = this.resources[rKey];
       let paths = [].concat(config[rKey]);
       if (!resource) throw new Error(`Resource ${rKey} not exists.`);

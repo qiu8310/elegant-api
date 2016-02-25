@@ -29,7 +29,6 @@ EADemo.controller('UserCtrl', function ($scope) {
   API.getAllUsers(function (err, users) {
     if (err) return handleError(err);
     $scope.users = users;
-    console.log(users);
     $scope.$apply();
   });
 
@@ -62,7 +61,7 @@ EADemo.controller('UserCtrl', function ($scope) {
     API[isCreateUser ? 'createUser' : 'updateUser'](user, function (err, user) {
       $scope.isSubmiting = false;
       $scope.userModal.modal('toggle');
-
+      console.log(user);
       if (err) handleError(err);
       else {
         if (isCreateUser) $scope.users.push(user);
@@ -71,6 +70,7 @@ EADemo.controller('UserCtrl', function ($scope) {
 
       $scope.$apply();
     });
+
   };
 
 });
