@@ -344,8 +344,58 @@ module.exports = class ElegantApi {
     callback(new Error(`Request key '${key}' not exists.`));
   }
 
-  _batchSeriesRequest() {}
-  _batchParallelRequest() {}
+  _batchSeriesRequest(arr, conf, callback) {
+    let index = 0;
+
+    let lastError = null, lastData = null;
+    let iterator = conf.iterator /* istanbul ignore next */|| util.emptyFunction;
+    let iteratorResult;
+
+    let next = () => {
+      let key = arr[index++];
+      if (key) {
+        iteratorResult = iterator(key, index - 1, lastError, lastData);
+        if (iteratorResult === false) return callback(lastError, lastData);
+
+        this.request(key, iteratorResult, (err, data) => {
+          lastError = err;
+          lastData = data;
+          next();
+        });
+      } else {
+        callback(lastError, lastData);
+      }
+    };
+
+    next();
+  }
+
+  _batchParallelRequest(obj, conf, callback) {
+    let keys = Object.keys(obj), len = keys.length;
+
+    let errMap = {}, dataMap = {}, hasError = false;
+    let iterator = conf.iterator || util.emptyFunction;
+
+    keys.forEach(key => {
+      let params = obj[key];
+      this.request(conf.alias && conf.alias[key] || key, params, (err, data) => {
+        len--;
+
+        iterator(params, key, err, data);
+
+        if (err) {
+          hasError = true;
+          errMap[key] = err;
+        } else {
+          dataMap[key] = data;
+        }
+
+        if (!len) {
+          callback(hasError ? errMap : null, dataMap);
+        }
+      });
+    });
+  }
 }
 
 /**

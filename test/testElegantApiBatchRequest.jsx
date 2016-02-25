@@ -1,8 +1,10 @@
 import assert from 'should';
 import ElegantApi from '../src/ElegantApi';
+import { extend } from '../src/libs/util';
+
 import OPTIONS from './server/options';
 
-OPTIONS.mock = 'memory';
+const options = extend(true, {}, OPTIONS, { mock: {memory: true} });
 
 describe('ElegantApi Batch Request', () => {
 
@@ -10,7 +12,7 @@ describe('ElegantApi Batch Request', () => {
 
   context('parallel', () => {
     it('should send parallel requests', done => {
-      EA = new ElegantApi(OPTIONS);
+      EA = new ElegantApi(options);
 
       EA.request({userA: {uid: 1}, userB: {uid: 2}, userC: {uid: 3}}, (err, data) => {
         assert.ok(!err);
@@ -44,7 +46,7 @@ describe('ElegantApi Batch Request', () => {
   context('series', () => {
     it('should send series requests', done => {
       let count = 0;
-      EA = new ElegantApi(OPTIONS);
+      EA = new ElegantApi(options);
       EA.request(
         ['userA', 'userB', 'userC'],
         {iterator: (key, i, err, data) => {
@@ -65,7 +67,7 @@ describe('ElegantApi Batch Request', () => {
     });
 
     it('should stop series requests', done => {
-      EA = new ElegantApi(OPTIONS);
+      EA = new ElegantApi(options);
       let count = 0;
       EA.request(
         ['userA', 'userB', 'userC'],

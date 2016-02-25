@@ -43,7 +43,7 @@ export default {
   },
 
   request: {
-    naming: null,
+    naming: null
     // 数组也会 extend，所以没有在这里定义，而是写在函数中
     // order: ['resource', 'alias', 'computed', 'drop', 'map', 'naming']
   },
