@@ -32,9 +32,7 @@ if test $# -gt 0; then
     exit 1
   fi
   git changelog -t $1 \
-    && git release $1 \
-    && echo 'publish docs' \
-    && sh ./publish_docs.sh \
+    && git release $1 -m "chore: Release $1" \
     && echo 'npm publish ... ' \
     && npm publish
 else
