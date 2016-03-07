@@ -68,6 +68,14 @@ describe('EA Config', () => {
         done();
       });
     });
+
+    it('should not throws when no route but only mock', done => {
+      EA = new ElegantApi({mocks: {foo: true}});
+      EA.request('foo').then(res => {
+        assert.ok(res === true);
+        done();
+      }).catch(done);
+    })
   });
 
   context('globals', () => {

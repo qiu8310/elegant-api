@@ -36,12 +36,17 @@ module.exports = class ElegantApi {
     rootOptions = formatRootOptions(rootOptions);
 
     this.globals = globals;
+    this.mocks = mockOptions || mocks;
+    // 支持用户只写 mocks 而不写 routes 的情况
+    util.each(this.mocks, (mock, key) => { if (!(key in routes)) routes[key] = {}; });
+
     this.routes = util.mapObject(routes, (route, key) =>
       formatInitialRoute(key, util.objectify(route), rootOptions));
     this.resources = util.mapObject(resources, formatResource);
     this.responseResources = util.mapObject(this.resources, reverseResource);
-    this.mocks = mockOptions || mocks;
+
     this.apis = {};
+
     util.each(this.routes, route => this.apis[route.name] = this._generateApi(route));
   }
 
