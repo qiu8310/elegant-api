@@ -54,10 +54,12 @@
 * [x] 并行的批量请求不能出现相同的key，可以支持在批量请求的 conf 里定义一个 alias 字段
 * [x] mock server 只需要 mock数据就行了，不需要 baseOptions，也就不用新起一个 EelgantApi 对象
 * [x] 支持通过 cookie 和 query 两种 模式 向 standalone server 发送数据
-* [ ] 支持定义 resource 
+* [x] 支持定义 resource 
 * [ ] 自动生成后端的 api 文档 https://sample-threes.readme.io/docs/orders
-* [ ] monk server 支持永久修改 db 数据
-* [ ] 加入 Promise 支持
+* [x] monk server 支持永久修改 db 数据
+* [x] 加入 Promise 支持
+* [ ] path 支持动态变化 (优先级不高，这应该后端做)
+* [ ] 参数支持数组或其它非 PlainObject 类型
 
 ## TEST CASES
 

@@ -10,7 +10,15 @@ module.exports = function (httpOptions, mockOptions) {
   });
 
   result.$ea = ea;
-  result.$request = function () { ea.request.apply(ea, arguments); };
+  result.$request = function () { return ea.request.apply(ea, arguments); };
+  result.$r = result.$resource = function (key) {
+    let res = ea.resources[key];
+    return res ? Object.keys(res).reduce((result, key) => {
+      let val = res[key].defaultValue;
+      result[key] = val === undefined ? null : val;
+      return result;
+    }, {}) : {};
+  }
 
   return result;
 };
