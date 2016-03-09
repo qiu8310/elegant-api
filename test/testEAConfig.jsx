@@ -570,18 +570,16 @@ describe('EA Config', () => {
 
     });
 
-    it('http.data should be empty when http.method is GET, HEAD or DELETE', done => {
+    it('http.data should be empty when http.method is GET or HEAD', done => {
       EA = new ElegantApi({
         mock: MOCK,
         routes: {
           get: {method: 'GET'},
-          head: {method: 'HEAD'},
-          del: {method: 'DELETE'}
+          head: {method: 'HEAD'}
         },
         mocks: {
           get: true,
-          head: true,
-          del: true,
+          head: true
         },
         handle(target, cb) {
           Object.keys(target.http.data).should.have.a.length(0);
@@ -593,7 +591,6 @@ describe('EA Config', () => {
       let data = {a: 'aa', b: 'bb'};
       EA.request('get', data)
         .then(() => EA.request('head', data))
-        .then(() => EA.request('del', data))
         .then(() => done())
         .catch(done);
     });

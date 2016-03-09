@@ -27,7 +27,7 @@ const SMART_CACHE_HTTP_METHODS = ['GET', 'HEAD'];
  *
  * 当 http method 为下面字段之一时， http requres 的内容应该为空，即 `data = {}`
  */
-const NO_BODY_CONTENT_HTTP_METHODS = ['GET', 'HEAD', 'DELETE'];
+const NO_BODY_CONTENT_HTTP_METHODS = ['GET', 'HEAD'];
 
 
 /**
