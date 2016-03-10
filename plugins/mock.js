@@ -1,7 +1,7 @@
 module.exports = function (mocks, key, transformData, callback) {
   var mockTarget;
-  if (key in mocks) {
-    mockTarget = mocks[key];
+  if (key in mocks || '$default' in mocks) {
+    mockTarget = key in mocks ? mocks[key] : mocks.$default;
     if (typeof mockTarget === 'function') mockTarget(transformData, callback);
     else callback(null, mockTarget);
   } else {

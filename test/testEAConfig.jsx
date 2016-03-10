@@ -737,6 +737,31 @@ describe('EA Config', () => {
         done();
       });
     });
+
+    it('should response default value', done => {
+      let count = 0;
+      EA = new ElegantApi({
+        mock: MOCK,
+        cache: false,
+        routes: {
+          foo: true,
+          bar: true
+        },
+        mocks: {
+          $default(traget, cb) {
+            cb(null, ++count);
+          }
+        }
+      });
+
+      EA.request('foo')
+        .then(d => d.should.eql(1))
+        .then(() => EA.request('bar'))
+        .then(d => d.should.eql(2))
+        .then(() => EA.request('foo'))
+        .then(d => { d.should.eql(3); done(); })
+        .catch(done);
+    })
   });
 
 });

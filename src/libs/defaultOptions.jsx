@@ -69,7 +69,15 @@ export default {
     throw new Error('Need implement handler function in options');
   },
 
-  mocks: {},
+  mocks: {
+    /* 全局默认的 mock
+    $default: {
+      status: 0,
+      data: null,
+      message: ''
+    }
+    */
+  },
   resources: {},
   routes: {}
 };
