@@ -156,25 +156,59 @@ module.exports = class ElegantApi {
    * @private
    */
   _cache(route, cb) {
-    let http = route.http;
-    let cacheKey = JSON.stringify([route.name, http.params, http.query]);
 
-    let {cacheSize, cacheMap, cacheStack} = this.globals;
+    let cache = this._getCache(route);
 
-    if (cacheKey in cacheMap) {
-      cb(null, cacheMap[cacheKey]);
+    if (cache.exists) {
+      cb(null, cache.value);
       return false;
     } else {
       return (err, data) => {
         if (!err) {
-          cacheMap[cacheKey] = data;
-          cacheStack.push(cacheKey);
-          if (cacheSize > 0 && cacheStack.length > cacheSize) {
-            delete cacheMap[cacheStack.shift()];
-          }
+          this._setCache(route, data);
         }
         cb(err, data);
       };
+    }
+  }
+
+  removeCache(name) {
+    let {cacheMap, cacheStack} = this.globals;
+    delete cacheMap[name];
+    this.globals.cacheStack = cacheStack.filter(c => c[0] !== name);
+  }
+
+
+  _getCache(route) {
+    let {cacheMap} = this.globals;
+    let {name, http} = route, key;
+
+    let exists = false, value = null;
+
+    if (name in cacheMap) {
+      cacheMap = cacheMap[name];
+      key = JSON.stringify([http.params, http.query]);
+      exists = key in cacheMap;
+      value = cacheMap[key];
+    }
+
+    return {exists, value};
+  }
+
+  _setCache(route, data) {
+    let {cacheSize, cacheMap, cacheStack} = this.globals;
+    let {name, http} = route;
+
+    let ref = cacheMap[name] || {},
+      key = JSON.stringify([http.params, http.query]);
+
+    ref[key] = data;
+    cacheMap[name] = ref;
+    cacheStack.push([name, key]);
+
+    if (cacheSize > 0 && cacheStack.length > cacheSize) {
+      let [n, k] = cacheStack.shift();
+      cacheMap[n] && delete cacheMap[n][k];
     }
   }
 

@@ -220,6 +220,40 @@ describe('EA Config', () => {
       }).catch(done);
     });
 
+    it('should remove cached route name', done => {
+      let count = 0;
+      EA = new ElegantApi({
+        mock: {delay: 0},
+        mocks: {
+          foo(target, cb) {
+            cb(null, ++count);
+          }
+        }
+      });
+
+      EA.request('foo')
+        .then(data => {
+          EA.globals.cacheStack.should.have.a.length(1);
+          data.should.eql(1);
+        })
+        .then(() => {
+          return EA.request('foo').then(data => {
+            data.should.eql(1);
+          });
+        })
+        .then(() => {
+          EA.removeCache('foo');
+          EA.globals.cacheStack.should.have.a.length(0);
+        })
+        .then(() => {
+          return EA.request('foo').then(data => {
+            data.should.eql(2);
+            done();
+          });
+        })
+        .catch(done);
+    });
+
     it('should not cache error response even if cache is enabled', done => {
       EA = new ElegantApi({
         mock: {delay: 0},

@@ -35,7 +35,7 @@ const NO_BODY_CONTENT_HTTP_METHODS = ['GET', 'HEAD'];
  * @param  {String} target
  * @return {Object}
  * @example
- * "fo=:foo&bar=&version" =>
+ * "fo=:foo&bar=&version=1" =>
  *
  * {
  *   fo: {
@@ -45,7 +45,9 @@ const NO_BODY_CONTENT_HTTP_METHODS = ['GET', 'HEAD'];
  *   bar: {
  *     required: true
  *   },
- *   version: {}
+ *   version: {
+ *     value: '1'
+ *   }
  * }
  *
  * @private
