@@ -156,7 +156,6 @@ module.exports = class ElegantApi {
    * @private
    */
   _cache(route, cb) {
-
     let cache = this._getCache(route);
 
     if (cache.exists) {
@@ -165,6 +164,7 @@ module.exports = class ElegantApi {
     } else {
       return (err, data) => {
         if (!err) {
+          if (route.removeCache) this.removeCache(route.removeCache);
           this._setCache(route, data);
         }
         cb(err, data);
@@ -172,10 +172,16 @@ module.exports = class ElegantApi {
     }
   }
 
-  removeCache(name) {
+  /**
+   * 删除指定的 routeNames 上的缓存
+   * @param  {String|Array} routeNames
+   */
+  removeCache(routeNames) {
     let {cacheMap, cacheStack} = this.globals;
-    delete cacheMap[name];
-    this.globals.cacheStack = cacheStack.filter(c => c[0] !== name);
+    let keys = [].concat(routeNames);
+
+    keys.forEach(k => delete cacheMap[k]);
+    this.globals.cacheStack = cacheStack.filter(c => keys.indexOf(c[0]) < 0);
   }
 
 

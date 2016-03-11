@@ -220,7 +220,7 @@ describe('EA Config', () => {
       }).catch(done);
     });
 
-    it('should remove cached route name', done => {
+    it('should remove cached route name through api', done => {
       let count = 0;
       EA = new ElegantApi({
         mock: {delay: 0},
@@ -252,6 +252,44 @@ describe('EA Config', () => {
           });
         })
         .catch(done);
+    });
+
+    it('should remove cached route name through config', done => {
+      let count = 0;
+      EA = new ElegantApi({
+        mock: {delay: 0},
+        cache: true,
+        routes: {
+          bar: {
+            removeCache: 'foo'
+          }
+        },
+        mocks: {
+          foo(target, cb) {
+            cb(null, ++count);
+          },
+          bar: true
+        }
+      });
+
+      EA.request('foo')
+        .then(() => {
+          return EA.request('foo')
+            .then(data => {
+              data.should.be.eql(1); // cached
+            });
+        })
+        .then(() => {
+          return EA.request('bar'); // will remove cache foo
+        })
+        .then(() => {
+          return EA.request('foo').then(data => {
+            data.should.be.eql(2); // no cache
+            done()
+          });
+        })
+        .catch(done);
+
     });
 
     it('should not cache error response even if cache is enabled', done => {
