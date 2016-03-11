@@ -164,7 +164,6 @@ module.exports = class ElegantApi {
     } else {
       return (err, data) => {
         if (!err) {
-          if (route.removeCache) this.removeCache(route.removeCache);
           this._setCache(route, data);
         }
         cb(err, data);
@@ -177,6 +176,8 @@ module.exports = class ElegantApi {
    * @param  {String|Array} routeNames
    */
   removeCache(routeNames) {
+    if (!routeNames) return false;
+
     let {cacheMap, cacheStack} = this.globals;
     let keys = [].concat(routeNames);
 
@@ -234,6 +235,7 @@ module.exports = class ElegantApi {
       try {
         // 要深拷贝，防止用户修改返回的数据
         data = this._apply(util.deepClone(data), route.response, 'response');
+        this.removeCache(route.removeCache);
         cb(err, data);
       } catch (err) {
         cb(err);

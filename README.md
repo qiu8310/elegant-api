@@ -62,11 +62,11 @@
 * [x] monk server 支持永久修改 db 数据
 * [x] 加入 Promise 支持
 * [ ] 自动生成后端的 api 文档 https://sample-threes.readme.io/docs/orders
-* [ ] path 支持动态变化 (优先级不高，这应该后端做)
 * [ ] 参数支持数组或其它非 PlainObject 类型
 * [x] 支持清除某个 router 的所有缓存 (添加了 api.removeCache(routeNames)，或者在 routes 中配置 removeCache 属性)
 * [x] 支持默认的 mock，只需要在 mocks 中配置一个 `$default` 属性即可 （如果没有找到对应的 mock 就用默认的，因为有很多 POST 或 DELETE 请求只需要知道结果就行了）
 * [x] 支持在调用时配置 http 请求(只能配置 http, mock, debug, cache 这四个属性)
+* [x] path 支持动态变化 (http 中的 path 选项可以动态配置，所以此项也就完成了)
 * [ ] 支持添加 request 和 response 的 interceptor
 * [ ] request 中的 map 只能 map data，希望可以支持 mapPath, mapQuery
 
