@@ -6,7 +6,7 @@ module.exports = function (httpOptions, mockOptions) {
   let result = {};
 
   util.objectKeys(ea.routes).forEach(key => {
-    result[key] = (params, callback) => ea.request(key, params, callback);
+    result[key] = (...args) => ea.request(key, ...args);
   });
 
   result.$ea = ea;

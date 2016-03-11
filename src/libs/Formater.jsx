@@ -76,6 +76,61 @@ function formatQueryString(target) {
   }, {});
 }
 
+
+/**
+ * 格式化配置中的 http 选项
+ * @private
+ */
+function formatRouteHttpOption(route) {
+  // 将 route 中的属性 copy 到 route.http 中（只 copy route.http 中支持的 keys）
+  let http = route.http;
+
+  for (let key in http) {
+    if (key in route) http[key] = route[key];
+  }
+
+  http.path = util.urlNormalize(route.base + route.path);
+  http.method = http.method.toUpperCase();
+
+  return route.http;
+}
+
+/**
+ * 格式化配置中的 mock 选项
+ * @private
+ */
+function formatRouteMockOption(route) {
+  let mock = route.mock;
+
+  if (!util.isObject(mock)) {
+    mock = route.mock = {disabled: !mock};
+  }
+
+  // debug
+  if (!('debug' in mock)) mock.debug = route.debug;
+
+  if (mock.disabled) {
+    delete mock.memory;
+  }
+  if (mock.disabled || mock.memory) {
+    delete mock.server;
+    delete mock.proxy;
+  }
+
+  return route.mock;
+}
+
+/**
+ * 格式化配置中的 cache 选项
+ * @private
+ */
+function formatRouteCacheOption(route) {
+  route.cache = route.cache === 'smart' && SMART_CACHE_HTTP_METHODS.indexOf(route.http.method) >= 0
+    || route.cache === true;
+
+  return route.cache;
+}
+
 /**
  * 对用户提供的 rootOptions 格式化
  * @param  {Object} rootOptions 用户配置（不应该包括 routes/resorces/mocks/globals
@@ -101,31 +156,12 @@ export function formatInitialRoute(routeKey, route, formatedRootOptions) {
   route.query = formatQueryString(route.query);
   route.data = formatQueryString(route.data);
 
+  // 创建一个全新的 route，不要污染原有的
   route = util.extend(true, {}, formatedRootOptions, route);
 
-  // 将 route 中的属性 copy 到 route.http 中（只 copy route.http 中支持的 keys）
-  let {http, mock} = route;
-  if (!mock) mock = route.mock = {disabled: true};
-
-  for (let key in http) {
-    if (key in route) http[key] = route[key];
-  }
-
-  http.path = util.urlNormalize(route.base + route.path);
-  http.method = http.method.toUpperCase();
-
-  route.cache = route.cache === 'smart' && SMART_CACHE_HTTP_METHODS.indexOf(http.method) >= 0
-    || route.cache === true;
-
-  // debug
-  mock.debug = route.debug;
-  if (mock.disabled) {
-    delete mock.memory;
-  }
-  if (mock.disabled || mock.memory) {
-    delete mock.server;
-    delete mock.proxy;
-  }
+  formatRouteHttpOption(route);
+  formatRouteMockOption(route);
+  formatRouteCacheOption(route);
 
   return route;
 }
@@ -261,16 +297,32 @@ function validateParsedUserArgs(userArgs, route) {
 
 
 /**
- * 在用户调用 request(routeKey, userArgs, callback) 时，用 userArgs 来合成一个全新的 route
+ * 在用户调用 request(routeKey, userArgs, callback, userRoute) 时，合成一个全新的 route
  * @param  {Object} route
  * @param  {Object} userArgs
+ * @param  {Object} userRoute
+ *         - http （不支持在 route 外层设置 http 属性）
+ *         - mock
+ *         - debug
+ *         - cache
+ *
  * @return {Object}
  */
-export function formatRealtimeRoute(route, userArgs) {
+export function formatRealtimeRoute(route, userArgs, userRoute) {
   route = util.extend(true, {}, route);
+  userRoute = util.extend(true, {}, userRoute);
+  let http = route.http, userHttp = userRoute.http || {};
+
+  // path, method 需要特殊处理
+  if (userHttp.path) userHttp.path = util.urlNormalize(route.base + userHttp.path);
+  if (userHttp.method) userHttp.method = userHttp.method.toUpperCase();
+  util.extend(true, http, userHttp); // http 用继承
+
+  if ('mock' in userRoute) route.mock = formatRouteMockOption(userRoute); // mock 直接覆盖
+  if ('cache' in userRoute) route.cache = formatRouteCacheOption(userRoute); // cache 也直接覆盖
+  if ('debug' in userRoute) route.mock.debug = userRoute.debug;
 
   let {params, query, data} = parseUserArgs(userArgs, route);
-  let http = route.http;
 
   http.path = getFullPathFromParams(http.path, params);
   http.params = params;

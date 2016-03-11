@@ -271,10 +271,15 @@ module.exports = class ElegantApi {
   }
 
   _generateApi(route) {
-    return (userArgs, cb) => {
+    return (userArgs, userRoute, cb) => {
+      if (typeof userRoute === 'function') {
+        cb = userRoute;
+        userRoute = {};
+      }
+
       // 返回的是一个全新的 route，其中 route.http.{path, params, query, data} 都是计算后的
       try {
-        route = formatRealtimeRoute(route, userArgs);
+        route = formatRealtimeRoute(route, userArgs, userRoute);
       } catch (e) {
         return cb(e);
       }
@@ -356,17 +361,19 @@ module.exports = class ElegantApi {
     };
   }
 
-  request(source, params, callback) {
+  request(source, params, config, callback) {
     if (typeof params === 'function') callback = params;
+    else if (typeof config === 'function') callback = config;
 
     // 保证参数类型
     params = util.objectify(params);
+    config = util.objectify(config);
     if (typeof callback !== 'function') callback = util.emptyFunction;
 
     let end = callback => {
-      if (typeof source === 'string') return this._singleRequest(source, params, callback);
-      else if (util.isArray(source)) return this._batchSeriesRequest(source, params, callback);
-      else if (util.isObject(source)) return this._batchParallelRequest(source, params, callback);
+      if (typeof source === 'string') return this._singleRequest(source, params, config, callback);
+      else if (util.isArray(source)) return this._batchSeriesRequest(source, params, config, callback);
+      else if (util.isObject(source)) return this._batchParallelRequest(source, params, config, callback);
 
       callback(new SyntaxError('Illegal arguments.'));
     };
@@ -384,12 +391,12 @@ module.exports = class ElegantApi {
     }
   }
 
-  _singleRequest(key, params, callback) {
-    if (this.apis[key]) return this.apis[key](params, callback);
+  _singleRequest(key, params, config, callback) {
+    if (this.apis[key]) return this.apis[key](params, config, callback);
     callback(new Error(`Request key '${key}' not exists.`));
   }
 
-  _batchSeriesRequest(arr, conf, callback) {
+  _batchSeriesRequest(arr, conf, config, callback) {
     let index = 0;
 
     let lastError = null, lastData = null;
@@ -402,7 +409,7 @@ module.exports = class ElegantApi {
         iteratorResult = iterator(key, index - 1, lastError, lastData);
         if (iteratorResult === false) return callback(lastError, lastData);
 
-        this.request(key, iteratorResult, (err, data) => {
+        this.request(key, iteratorResult, config[key], (err, data) => {
           lastError = err;
           lastData = data;
           next();
@@ -415,7 +422,7 @@ module.exports = class ElegantApi {
     next();
   }
 
-  _batchParallelRequest(obj, conf, callback) {
+  _batchParallelRequest(obj, conf, config, callback) {
     let keys = Object.keys(obj), len = keys.length;
 
     let errMap = {}, dataMap = {}, hasError = false;
@@ -423,7 +430,8 @@ module.exports = class ElegantApi {
 
     keys.forEach(key => {
       let params = obj[key];
-      this.request(conf.alias && conf.alias[key] || key, params, (err, data) => {
+      let requestKey = conf.alias && conf.alias[key] || key;
+      this.request(requestKey, params, config[requestKey], (err, data) => {
         len--;
 
         iterator(params, key, err, data);

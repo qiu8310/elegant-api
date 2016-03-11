@@ -20,7 +20,7 @@
 
 ## 使用
 
-[配置请参考这里](./src/defaultHttpOptions.jsx)
+[配置请参考这里](./src/libs/defaultHttpOptions.jsx)
 
 ## 特点
 
@@ -66,8 +66,8 @@
 * [ ] 参数支持数组或其它非 PlainObject 类型
 * [x] 支持清除某个 router 的所有缓存 (添加了 api.removeCache(routeNames)，或者在 routes 中配置 removeCache 属性)
 * [x] 支持默认的 mock，只需要在 mocks 中配置一个 `$default` 属性即可 （如果没有找到对应的 mock 就用默认的，因为有很多 POST 或 DELETE 请求只需要知道结果就行了）
+* [x] 支持在调用时配置 http 请求(只能配置 http, mock, debug, cache 这四个属性)
 * [ ] 支持添加 request 和 response 的 interceptor
-* [ ] 支持在调用时配置 http 请求
 * [ ] request 中的 map 只能 map data，希望可以支持 mapPath, mapQuery
 
 
