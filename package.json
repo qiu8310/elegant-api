@@ -10,7 +10,8 @@
     "test-rd-server": "NODE_ENV=test babel-node ./test/server/rd-server.jsx",
     "test-watch": "NODE_ENV=test karma start",
     "test": "NODE_ENV=test babel-node --plugins transform-runtime ./test/server/start.jsx",
-    "build": "NODE_ENV=production webpack && NODE_ENV=production webpack -p"
+    "build": "NODE_ENV=production webpack && NODE_ENV=production webpack -p",
+    "coveralls": "cat coverage/Phantom*/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "files": [
     "dist/",
@@ -52,6 +53,7 @@
     "body-parser": "^1.14.2",
     "bootstrap": "^3.3.6",
     "cookie-parser": "^1.4.0",
+    "coveralls": "^2.11.8",
     "cz-conventional-changelog": "^1.1.5",
     "es3ify-loader": "^0.1.0",
     "es5-shim": "^4.5.5",

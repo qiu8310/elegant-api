@@ -1,4 +1,8 @@
 # elegant-api
+[![NPM version](https://badge.fury.io/js/elegant-api.svg)](https://npmjs.org/package/elegant-api)
+[![Build Status](https://travis-ci.org/qiu8310/elegant-api.svg?branch=master)](https://travis-ci.org/qiu8310/elegant-api)
+[![Coverage Status](https://coveralls.io/repos/qiu8310/elegant-api/badge.png)](https://coveralls.io/r/qiu8310/elegant-api)
+
 
 优雅的定义 API 接口
 
