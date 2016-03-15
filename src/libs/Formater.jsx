@@ -330,7 +330,7 @@ export function formatRealtimeRoute(route, userArgs, userRoute) {
   http.data = data;
 
   // 每次都计算，主要是用户可能配置了一个时间范围
-  route.mock.delay = getDelayTime(route.mock.delay);
+  route.mock.delay = route.mock.memory ? getDelayTime(route.mock.delay) : 0;
 
   return route;
 }

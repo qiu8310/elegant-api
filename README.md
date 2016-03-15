@@ -69,6 +69,7 @@
 * [x] path 支持动态变化 (http 中的 path 选项可以动态配置，所以此项也就完成了)
 * [ ] 支持添加 request 和 response 的 interceptor
 * [ ] request 中的 map 只能 map data，希望可以支持 mapPath, mapQuery
+* [ ] resource 支持 get/set/post/put/delete 方法
 
 
 

@@ -9,6 +9,7 @@ describe('EA Realtime Config', () => {
     let i = 0;
     let EA = new ElegantApi({
       mock: MOCK,
+      cache: false,
       routes: {
         foo: {
           mock: { memory: false, debug: false }

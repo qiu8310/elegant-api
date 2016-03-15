@@ -92,10 +92,9 @@ module.exports = class ElegantApi {
         aliasKey = conf.alias;
       }
 
-      if (oldVal == null) oldVal = conf.defaultValue;
+      if (oldVal === undefined) oldVal = conf.defaultValue;
 
       obj[aliasKey] = conf.write ? conf.write.call(obj, oldVal) : oldVal;
-
     });
 
     util.each(removes, (key) => delete obj[key]);
@@ -207,7 +206,7 @@ module.exports = class ElegantApi {
     let {name, http} = route;
 
     let ref = cacheMap[name] || {},
-      key = JSON.stringify([http.params, http.query]);
+      key = JSON.stringify([http.params, util.omit(http.query, ['__ea', '__eaData'])]);
 
     ref[key] = data;
     cacheMap[name] = ref;
@@ -427,7 +426,7 @@ module.exports = class ElegantApi {
   _batchParallelRequest(obj, conf, config, callback) {
     let keys = Object.keys(obj), len = keys.length;
 
-    let errMap = {}, dataMap = {}, hasError = false;
+    let errMap = new Error('MAP_ERROR'), dataMap = {}, hasError = false;
     let iterator = conf.iterator || util.emptyFunction;
 
     keys.forEach(key => {
@@ -441,6 +440,7 @@ module.exports = class ElegantApi {
         if (err) {
           hasError = true;
           errMap[key] = err;
+          if (err.message) errMap.message = err.message; // 和 single request 一致，方便统一处理错误
         } else {
           dataMap[key] = data;
         }

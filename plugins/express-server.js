@@ -2,28 +2,33 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var eaExpressMiddleware = require('./express-middleware');
 
-var app = require('express')();
+module.exports = function (config) {
 
+  var app = require('express')();
 
-app.use(cookieParser());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(function (req, res, next) {
+    res.append('Access-Control-Allow-Origin', '*');
+    res.append('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.append('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
+    next();
+  });
 
-var baseOptions = {};
-var mockOptions = {};
-app.use(eaExpressMiddleware(baseOptions, mockOptions));
+  app.use(cookieParser());
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/favicon.ico', function (req, res) {
-  res.send('');
-});
+  app.use(eaExpressMiddleware(config.mocks));
 
-app.all('*', function (req, res) {
-  req.data = req.body;
-  console.log(req.params, req.data, req.query);
-  res.send('It works!');
-});
+  app.all('*', function (req, res) {
+    req.data = req.body;
+    console.log(req.params, req.data, req.query);
+    res.send('No mock!');
+  });
 
+  var port = config.port || 3000;
+  var host = config.host || config.hostname || '0.0.0.0';
 
-app.listen(3000, function () {
-  console.log('http://localhost:3000/');
-});
+  app.listen(port, host, function () {
+    console.log('http://' + host + ':' + port);
+  });
+}

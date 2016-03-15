@@ -87,6 +87,20 @@ export function deepClone(obj) {
 }
 
 /**
+ * 从一个对象中忽略指定的 keys， 并将剩下的 keys 组成的一个新的 Object
+ * @param  {Object} obj
+ * @param  {Array|String} keys
+ * @return {Object}
+ */
+export function omit(obj, keys) {
+  keys = [].concat(keys);
+  return Object.keys(obj).reduce((res, key) => {
+    if (keys.indexOf(key) < 0) res[key] = obj[key];
+    return res;
+  }, {});
+}
+
+/**
  * 对象继承
  * @param {Boolean} [deep] 是否深度继承
  * @param {Object} src

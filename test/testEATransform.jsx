@@ -39,7 +39,7 @@ describe('EA Transform', () => {
         mocks: {
           getUser: {
             status: 0,
-            data: {uid: 1, 'user_name': 'u1', year: 1990, sex: null}
+            data: {uid: 1, 'user_name': 'u1', year: 1990, sex: undefined}
           },
           createUser(trans, cb) {
             cb(null, {
