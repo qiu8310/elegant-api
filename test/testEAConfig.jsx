@@ -289,7 +289,45 @@ describe('EA Config', () => {
           });
         })
         .catch(done);
+    });
 
+    it('should append a timestamp query to url after remove cache', done => {
+      let i = 0;
+      EA = new ElegantApi({
+        mock: {delay: 0},
+        handle(target, cb) {
+          if (i === 3) {
+            target.http.url.should.containEql('?_t=')
+          }
+          cb(target.error, target.data);
+        },
+        routes: {
+          foo: {method: 'POST', cache: true},
+          bar: {removeCache: 'foo'}
+        },
+        mocks: {
+          $default(target, cb) { cb(null, ++i); }
+        }
+      });
+
+      EA.request('foo')
+        .then(data => {
+          data.should.eql(1);
+          return EA.request('foo')
+        })
+        .then(data => {
+          data.should.eql(1); // cached
+          return EA.request('bar'); // remove cache
+        })
+        .then(data => {
+          data.should.eql(2);
+          return EA.request('foo');
+        })
+        .then(data => {
+          data.should.eql(3);
+          done();
+        })
+        .catch(done);
     });
 
     it('should not cache error response even if cache is enabled', done => {
@@ -335,7 +373,9 @@ describe('EA Config', () => {
         cacheStack.should.have.a.length(2);
         done();
       }).catch(done);
-    })
+    });
+
+
   });
 
   context('emulate', () => {
@@ -606,7 +646,7 @@ describe('EA Config', () => {
           foo: { query: 'qid=:id', data: 'did=:tt', method: 'post' }
         },
         handle(target, cb) {
-          target.http.url.should.eql('/api?qid=33'); // not "/api?id=33"
+          target.http.url.should.startWith('/api?qid=33'); // not "/api?id=33"
           target.http.data.did.should.eql('xx');
           done();
         },

@@ -10,6 +10,16 @@ describe('ElegantApi Batch Request', () => {
 
   let EA;
 
+  context('error', () => {
+    it('should not handle no string, array, object as first paramater', done => {
+      EA = new ElegantApi(options);
+      EA.request(12, err => {
+        assert.ok(err);
+        done();
+      });
+    });
+  });
+
   context('parallel', () => {
     it('should send parallel requests', done => {
       EA = new ElegantApi(options);

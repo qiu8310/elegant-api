@@ -24,6 +24,7 @@ export default {
   // 这里的设置不会被单独的 route 覆盖
   globals: {
     eaQueryPrefix: '__',
+    cacheQueryKey: '_t', // 如果声明了 cache 为 false，则会在 url 上带上此参数，其值是当前的时间的毫秒数
     cacheSize: 100,
     cacheMap: {},
     cacheStack: []

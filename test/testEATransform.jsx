@@ -18,6 +18,13 @@ describe('EA Transform', () => {
               }
             }
           },
+          getUserError: {
+            request: {
+              resource: {
+                some: ''
+              }
+            }
+          },
           createUser: {
             method: 'post',
             path: '/users/',
@@ -85,6 +92,28 @@ describe('EA Transform', () => {
       Object.keys(r).should.have.a.length(1);
       assert.ok(r.user);
       done();
+    });
+
+    it('should throw when resource not exist', done => {
+      EA.request('getUserError')
+        .catch(e => {
+          e.message.should.containEql('Resource some not exists');
+          done();
+        });
+    });
+
+    it('should throw when resource type not illegal', () => {
+      assert.throws(() => {
+        new ElegantApi({resources: {user: { age: RegExp }}});
+      }, /Not supported resource type/);
+    });
+
+    it('support null resource config', () => {
+      EA = new ElegantApi({resources: {user: { age: null }}});
+      let u = EA.resources.user;
+      assert(u.type === null);
+      assert(u.alias === undefined);
+      assert(u.defaultValue === undefined);
     });
 
     it('should get resource of user', done => {

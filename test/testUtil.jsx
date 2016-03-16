@@ -179,5 +179,23 @@ describe('util', () => {
   });
 
 
+  context('appendQuery', () => {
+    it('should append empty string', () => {
+      util.appendQuery('http://a.com', '').should.eql('http://a.com');
+    });
+
+    it('should append to no query url', () => {
+      util.appendQuery('a.com', 'a=a&b=b').should.eql('a.com?a=a&b=b');
+    });
+
+    it('should append to has query url', () => {
+      util.appendQuery('a.com?a=a', 'b=b').should.eql('a.com?a=a&b=b');
+    });
+
+    it('should append to hash url', () => {
+      util.appendQuery('a.com#hash', 'a=a').should.eql('a.com?a=a#hash');
+    });
+  });
+
 
 });

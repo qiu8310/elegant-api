@@ -179,4 +179,17 @@ export function urlNormalize(url) {
   return url.replace(/(?:[^:])\/\//g, '\/');
 }
 
+/**
+ * 给 URL 添加 query 字符串
+ * @param  {String} url
+ * @param  {String} query
+ * @return {String}
+ */
+export function appendQuery(url, query) {
+  if (query === '') return url;
+  let parts = url.split('#');
+  return (parts[0] + '&' + query).replace(/[&?]{1,2}/, '?') + (parts.length === 2 ? ('#' + parts[1]) : '');
+}
+
+
 

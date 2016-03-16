@@ -47,6 +47,10 @@ module.exports = class ElegantApi {
 
     this.apis = {};
 
+    // removeCache 之后会将 routeName 写入此对象中，
+    // 这样下将再请求此 routeName 时，就会自动在 url 上加上个随机参数（可以避免 IE 6/7 的 GET 缓存）
+    this._needReloadRouteNameMap = {};
+
     util.each(this.routes, route => this.apis[route.name] = this._generateApi(route));
   }
 
@@ -180,7 +184,10 @@ module.exports = class ElegantApi {
     let {cacheMap, cacheStack} = this.globals;
     let keys = [].concat(routeNames);
 
-    keys.forEach(k => delete cacheMap[k]);
+    keys.forEach(k => {
+      this._needReloadRouteNameMap[k] = true;
+      delete cacheMap[k];
+    });
     this.globals.cacheStack = cacheStack.filter(c => keys.indexOf(c[0]) < 0);
   }
 
@@ -248,10 +255,15 @@ module.exports = class ElegantApi {
    * @private
    */
   _emulate(route) {
-    let {mock, http} = route;
+    let {mock, http, name} = route;
 
     let qs = util.buildQuery(http.query);
-    http.url = http.path + (qs ? '?' + qs : '');
+    http.url = util.appendQuery(http.path, qs);
+
+    if (!route.cache || this._needReloadRouteNameMap[name]) {
+      http.url = util.appendQuery(http.url, this.globals.cacheQueryKey + '=' + (new Date().getTime()));
+      delete this._needReloadRouteNameMap[name];
+    }
 
     if (mock.server && !/^https?:\/\//.test(http.url)) {
       http.crossOrigin = true;
@@ -273,10 +285,6 @@ module.exports = class ElegantApi {
 
   _generateApi(route) {
     return (userArgs, userRoute, cb) => {
-      if (typeof userRoute === 'function') {
-        cb = userRoute;
-        userRoute = {};
-      }
 
       // 返回的是一个全新的 route，其中 route.http.{path, params, query, data} 都是计算后的
       try {
@@ -440,6 +448,7 @@ module.exports = class ElegantApi {
         if (err) {
           hasError = true;
           errMap[key] = err;
+          /* istanbul ignore next */
           if (err.message) errMap.message = err.message; // 和 single request 一致，方便统一处理错误
         } else {
           dataMap[key] = data;
