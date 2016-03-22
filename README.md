@@ -1,10 +1,12 @@
-# elegant-api
+# elegant-api（开发中，文档尚不规范）
 [![NPM version](https://badge.fury.io/js/elegant-api.svg)](https://npmjs.org/package/elegant-api)
 [![Build Status](https://travis-ci.org/qiu8310/elegant-api.svg?branch=master)](https://travis-ci.org/qiu8310/elegant-api)
 [![Coverage Status](https://coveralls.io/repos/qiu8310/elegant-api/badge.png)](https://coveralls.io/r/qiu8310/elegant-api)
 
 
 优雅的定义 API 接口
+
+像这篇文章【[Angular2 mock backend](http://www.sitepoint.com/angular-2-mockbackend/)】这样写 mock，太累了
 
 ## 开发
 
@@ -20,13 +22,12 @@
 
 ## 使用
 
-[配置请参考这里](./src/libs/defaultHttpOptions.jsx)
+[配置请参考这里](./src/libs/defaultOptions.jsx)
 
 ## 特点
 
-1. 六种开发模式
+1. 五种开发模式
   * **MEMORY 模式：** 无后端，无服务器，后端数据通过前端直接 mock (`mock = {memory: true}`)
-  * **REMOTE 模式：** 在 local 服务器上嵌入 mock 服务器，数据从 mock 服务器生成 (`mock = {memory: false}`)
   * **PROXY  模式：** 在 local 服务器上嵌入 proxy 服务器，后端数据通过代理服务器传给前端 (`mock = {proxy: 'http://backend.server.com'`)
   * **REMOTE STANDALONE 模式：** 使用一个独立的 mock 服务器 (`mock = {server: 'http://mock.server.com'`)
   * **PROXY  STANDALONE 模式：** 使用一个独立的 proxy 服务器 (`mock = {server: 'http://mock.server.com', proxy: 'http://backend.server.com'`)
@@ -35,7 +36,7 @@
 3. **map：** 可以返回一个新的 request data 或 response data
 4. **computed：** 可以在 request data 或 response data 生成新的字段
 5. **naming：** 可以统一 request data 或 response data 中的 key 的命名风格，支持：`camel/kebab/snake/cap`
-6. **模拟延迟：** `mockDelay=3000` 或者 `mockDelay={min: 100, max: 4000}`
+6. **模拟延迟：** `mock.delay = 400` 或者 `mock.delay={min: 100, max: 4000}`
 7. **缓存 HTTP 请求：** 默认只有 GET 请求才会缓存，不过可以在任意一个 route 中配置 `cache` 变量，来标识是否使用缓存
 8. **emulateJSON 和 emulateHTTP：** 来自于 [vue-resource](https://github.com/vuejs/vue-resource/tree/0.5.1#options)
 9. **参数验证：** 支持对设置 request 中的 params, query 和 data 字段，并可以 validate 其中 query 和 data
@@ -50,6 +51,7 @@
 
 * JSON: < IE8
 * es5-shim: < IE9
+* es-promise: 可选
 
 
 ## TODO
@@ -77,9 +79,7 @@
 
 * [ ] globals 属性只能在 commonOptions 中设置，子 route 中设置无效，可配置项是 
       globals: {eaQueryPrefix, cacheSize, cacheMap, cacheStack}
-
 * [ ] routes/mocks/resources
-
 * [ ] 所有可以在子 route 中覆盖 commonOptions 的属性有：
     - debug
     - base/path
@@ -94,7 +94,6 @@
 
     - handler
     - http：http 中所有属性可以直接在最外层的 commonOptions 中设置，系统会自动将支持的属性读取过来
-
 * [ ] route 中特有的属性
     - request/response
 
@@ -125,14 +124,10 @@ resources: {
 }
 ```
 
-
 * [ ] debug：并且可以单独对某一个 route 开启或关闭，同时可以将 debug 同步到后端 server
   - [ ] 确定 debug 需要输出哪些字段
-
 * [ ] 可以在共用 options 中设置 base 和 path，可以在 route 中覆盖它们，并且 http.url 是通过它们组装的，
       组装后要去掉 url 中的多余的反斜杠 "//"，但不要去掉 "http://" 里面的
-
-
 * [ ] GET/HEAD 请求不用 body 字段
 
 
