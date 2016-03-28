@@ -44,6 +44,7 @@
     "babel-core": "^6.3.26",
     "babel-loader": "^6.2.0",
     "babel-plugin-transform-class-properties": "^6.6.0",
+    "babel-plugin-transform-decorators": "^6.6.5",
     "babel-plugin-transform-es3-member-expression-literals": "^6.3.13",
     "babel-plugin-transform-es3-property-literals": "^6.3.13",
     "babel-plugin-transform-function-bind": "^6.5.2",
