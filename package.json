@@ -1,6 +1,6 @@
 {
   "name": "elegant-api",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Define elegant api, standalone frontend development",
   "main": "dist/elegant-api.js",
   "jsnext:main": "src/index.jsx",
@@ -11,7 +11,8 @@
     "test-watch": "NODE_ENV=test karma start",
     "test": "NODE_ENV=test babel-node --plugins transform-runtime ./test/server/start.jsx",
     "build": "NODE_ENV=production webpack && NODE_ENV=production webpack -p",
-    "coveralls": "cat coverage/Phantom*/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+    "coveralls": "cat coverage/Phantom*/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "type": "tsc src/type.ts -d --outDir dist/ && rm dist/type.js && mv dist/type.d.ts dist/elegant.d.ts"
   },
   "files": [
     "dist/",
