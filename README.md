@@ -11,7 +11,7 @@
 > * ajax 接口分散在各个地方，难以维护;
 > * 后端修改接口，可能需要前端大量修改;
 > * 后端的命名风格和前端不一致，造成前端代码风格怪异;
-> * 后端无法提前提供给前端使用，造成前端无法开发一些依赖于后端的复杂的功能;
+> * 后端无法提前提供给接口给前端使用，造成前端无法开发一些依赖于后端的复杂的功能;
 > * ...
 >
 
@@ -26,6 +26,7 @@ ajax，比如 jquery 的 ajax，或者 html5 标准的 fetch（[为什么不提�
 
 
 **用 elegant-api 甚至可以用在 Test 中 (@TODO: 写个 example)。**
+
 BTW，像这篇文章【[Angular2 mock backend](http://www.sitepoint.com/angular-2-mockbackend/)】这样写 mock，太累了
 
 ## 使用
@@ -184,10 +185,16 @@ BTW，像这篇文章【[Angular2 mock backend](http://www.sitepoint.com/angular
 
 当 mocks 中的配置是函数时，如上面的 `getAddress`，可以在函数的 this 作用域中找到下面四个函数
 
-- $objectify(target, mockName) 将 mockName 转化成返回数据的形式，而不是一个函数（当然这个 mockName 应该不需要参数，需要参数需要使用 $fetch）
-- $objectifyAll(target, mockNames)
-- $fetch(target, mockName, conf) 提供 conf 参数，获取 mockName 中的数据
-- $fetchAll(target, mockNameConfObj)
+- `$objectify(target, mockName)` 
+
+  将 mockName 转化成返回数据的形式，而不是一个函数（当然这个 mockName 应该不需要参数，需要参数需要使用 $fetch）
+
+- `$objectifyAll(target, mockNames)`
+- `$fetch(target, mockName, conf)` 
+
+  提供 conf 参数，获取 mockName 中的数据
+
+- `$fetchAll(target, mockNameConfObj)`
 
 
 <a id="qa"></a>
@@ -240,6 +247,8 @@ BTW，像这篇文章【[Angular2 mock backend](http://www.sitepoint.com/angular
 
 * [demos（很久没更新了，应该会有问题）](./demos/)
 
+
+--------------------------
 
 ## 其它无关的东西
 
