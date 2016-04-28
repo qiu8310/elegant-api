@@ -66,9 +66,47 @@ BTW，像这篇文章【[Angular2 mock backend](http://www.sitepoint.com/angular
   });
   ```
 
+### 在 typescript 中使用
+
+```ts
+/// <reference path="node_modules/elegant-api/src/type.d.ts" />
+
+let elegantApi: ElegantApi = require('elegant-api');
+
+interface API extends ElegantApiColluction {
+  getUser: EAApi;
+}
+
+let api: API = elegantApi({
+  handle(target: EAOptionHandleTarget, cb: EACallback) {
+    cb(target.error, target.data);
+  },
+  routes: {
+    getUser: {
+      path: '/users',
+      query: 'uid='
+    }
+  },
+  mocks: {
+    getUser(target: EAMockHandleTarget, cb: EACallback) {
+      let user = {
+        uid: target.query.uid,
+        name: 'Mora'
+      };
+      cb(null, user);
+    }
+  }
+});
+
+api.getUser({uid: 123}).then(data => {
+  console.log(data); // {uid: 123, name: 'Mora'}
+});
+```
+
+
 ### 配置
 
-* [typescript 配置描述](./src/options.ts)
+* [typescript 配置描述](./src/type.ts)
 * [默认的配置](./src/libs/defaultOptions.jsx)
 
 
@@ -206,6 +244,7 @@ BTW，像这篇文章【[Angular2 mock backend](http://www.sitepoint.com/angular
   * 很多框架都有自带的 ajax 方法，所以没有必要增加一个，带来多余代码
   * elegant-api 支持在配置中指定 handle 函数，这样你可以方便的在 handle 中用任意的 ajax 库，也可以对请求参数或返回的参数进行处理
   
+
 
 ## 代码测试
 

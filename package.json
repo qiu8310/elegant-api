@@ -11,8 +11,7 @@
     "test-watch": "NODE_ENV=test karma start",
     "test": "NODE_ENV=test babel-node --plugins transform-runtime ./test/server/start.jsx",
     "build": "NODE_ENV=production webpack && NODE_ENV=production webpack -p",
-    "coveralls": "cat coverage/Phantom*/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "type": "tsc src/type.ts -d --outDir dist/ && rm dist/type.js && mv dist/type.d.ts dist/elegant-api.d.ts"
+    "coveralls": "cat coverage/Phantom*/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "files": [
     "dist/",
