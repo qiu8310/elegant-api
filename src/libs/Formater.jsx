@@ -31,6 +31,15 @@ const NO_BODY_CONTENT_HTTP_METHODS = ['GET', 'HEAD'];
 
 
 /**
+ * 当用 JSON 提交数据时，用户可以提交任何格式的数据，而不是 Object
+ * 但此框架设计时候只考虑了 Object，所以为了支持这种格式，需要将这些变化
+ * 的数据转化成 Object，所以需要一个 key 来识别
+ *
+ * @type {String}
+ */
+const USER_DATA_RAW_KEY = '__raw_data_v1';
+
+/**
  * 解析像 url query 那样的字符串
  * @param  {String} target
  * @return {Object}
@@ -229,6 +238,7 @@ function parseUserArgs(userArgs, route) {
 
   let noBodyContent = NO_BODY_CONTENT_HTTP_METHODS.indexOf(http.method) >= 0;
   if (keys.every(k => allows.indexOf(k) >= 0)) {
+    if ('data' in userArgs) userArgs.data = encodeUserData(userArgs.data);
     allows.forEach(k => userArgs[k] = util.objectify(userArgs[k]));
     if (noBodyContent) userArgs.data = {};
     return validateParsedUserArgs(userArgs, route);
@@ -295,6 +305,26 @@ function validateParsedUserArgs(userArgs, route) {
   return userArgs;
 }
 
+/**
+ * 对非 Object 的 data 做处理，转化成 Object
+ * @param  {*} data
+ * @return {Object}
+ */
+export function encodeUserData(data) {
+  if (util.isObject(data)) return data;
+  return {
+    [USER_DATA_RAW_KEY]: data
+  };
+}
+
+/**
+ * 恢复 data
+ * @param  {Object} data
+ * @return {*}
+ */
+export function decodeUserData(data) {
+  return USER_DATA_RAW_KEY in data ? data[USER_DATA_RAW_KEY] : data;
+}
 
 /**
  * 在用户调用 request(routeKey, userArgs, callback, userRoute) 时，合成一个全新的 route

@@ -6,6 +6,7 @@ const util = require('./libs/util');
 const mockResponse = require('../plugins/mock');
 
 import {
+  decodeUserData,
   formatRootOptions,
   formatInitialRoute,
   formatRealtimeRoute,
@@ -281,8 +282,6 @@ module.exports = class ElegantApi {
       http.headers['Content-Type'] = 'application/x-www-form-urlencoded';
       http.data = util.buildQuery(http.data);
     }
-
-    http.body = http.data;
   }
 
   _generateApi(route) {
@@ -305,6 +304,7 @@ module.exports = class ElegantApi {
         if (cb === false) return false; // 说明直接使用了缓存的数据
       }
 
+      http.body = http.data = decodeUserData(http.data);
       let transformData = this._generateApiTransformData(route);
 
       if (!mock.disabled && !mock.memory) {

@@ -374,8 +374,6 @@ describe('EA Config', () => {
         done();
       }).catch(done);
     });
-
-
   });
 
   context('emulate', () => {
@@ -608,7 +606,6 @@ describe('EA Config', () => {
           done();
         });
       }).catch(done);
-
     });
 
     it('should support function and regexp validate in object config', done => {
@@ -679,7 +676,6 @@ describe('EA Config', () => {
         e.message.should.match(/Route foo missing query parameter: type/);
         EA.request('foo', {id: 3, type: 'users'});
       });
-
     });
 
     it('http.data should be empty when http.method is GET or HEAD', done => {
@@ -704,6 +700,32 @@ describe('EA Config', () => {
       EA.request('get', data)
         .then(() => EA.request('head', data))
         .then(() => done())
+        .catch(done);
+    });
+
+    it('should support submit no Object data', done => {
+      EA = new ElegantApi({
+        mock: MOCK,
+        routes: {
+          foo: {
+            method: 'POST'
+          }
+        },
+        mocks: {
+          foo(target, cb) {
+            cb(null, target.data);
+          }
+        }
+      });
+
+      EA.request('foo', {data: 123})
+        .then(data => assert.equal(data, 123))
+        .then(_ => EA.request('foo', {data: false})).then(d => assert.equal(d, false))
+        .then(_ => EA.request('foo', {data: 0})).then(d => assert.equal(d, 0))
+        .then(_ => EA.request('foo', {data: null})).then(d => assert.equal(d, null))
+        .then(_ => EA.request('foo', {data: []})).then(d => assert.deepEqual(d, []))
+        .then(_ => EA.request('foo', {data: {a: 1}})).then(d => assert.deepEqual(d, {a: 1}))
+        .then(_ => done())
         .catch(done);
     });
   });
