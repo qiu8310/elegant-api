@@ -5,7 +5,7 @@
   "main": "dist/elegant-api.js",
   "jsnext:main": "src/index.jsx",
   "scripts": {
-    "lint": "cs -f --jshint --jscs --eslint *.js plugins/**/*.js test/**/*.jsx src/**/*.jsx",
+    "lint": "cs -f --jshint --jscs --eslint *.js plugins/**/*.js test/**/*.jsx src/**/*.jsx -e es7.js",
     "test-fe-server": "NODE_ENV=test babel-node ./test/server/fe-server.jsx",
     "test-rd-server": "NODE_ENV=test babel-node ./test/server/rd-server.jsx",
     "test-watch": "NODE_ENV=test karma start",
