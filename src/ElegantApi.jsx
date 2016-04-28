@@ -1,5 +1,6 @@
 import transform from 'naming-transform';
 import defaultOptions from './libs/defaultOptions';
+import {mixin} from './libs/mockHelper';
 
 const util = require('./libs/util');
 const mockResponse = require('../plugins/mock');
@@ -39,6 +40,7 @@ module.exports = class ElegantApi {
     this.mocks = mockOptions || mocks;
     // 支持用户只写 mocks 而不写 routes 的情况
     util.each(this.mocks, (mock, key) => { if (!(key in routes && key !== '$default')) routes[key] = {}; });
+    mixin(this.mocks);
 
     this.routes = util.mapObject(routes, (route, key) =>
       formatInitialRoute(key, util.objectify(route), rootOptions));
