@@ -260,6 +260,8 @@ module.exports = class ElegantApi {
   _emulate(route) {
     let {mock, http, name} = route;
 
+    util.each(http.query, (val, key, query) => query[key] = String(val));
+
     let qs = util.buildQuery(http.query);
     http.url = util.appendQuery(http.path, qs);
 

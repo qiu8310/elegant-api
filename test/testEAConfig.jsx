@@ -595,7 +595,7 @@ describe('EA Config', () => {
       EA2.request('foo', {id: 1}).catch(err => err.message.should.match(/Route foo missing data parameter: q3/));
 
       EA1.request('foo', {id: 1, q3: '3'}).then(trans => {
-        trans.query.q1.should.eql(1);
+        trans.query.q1.should.eql('1');
         trans.query.q2.should.eql('val');
         trans.query.q3.should.eql('3');
 
@@ -666,7 +666,7 @@ describe('EA Config', () => {
           let query = target.http.query;
           query.version.should.eql('v1');
           query.type.should.eql('users');
-          query.id.should.eql(3);
+          query.id.should.eql('3');
           done();
         },
         mocks:{foo: 'foo'}
