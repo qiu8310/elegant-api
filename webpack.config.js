@@ -4,6 +4,7 @@ var min = process.argv.indexOf('-p') > 0 ? '.min' : '';
 var plugins = [];
 
 plugins.push(new webpack.DefinePlugin({
+  __DEBUG__: JSON.stringify('DEBUG' in process.env),
   'process.env': {
     CI: JSON.stringify(!!process.env.CI),
     NODE_ENV: JSON.stringify(process.env.NODE_ENV || 'development')

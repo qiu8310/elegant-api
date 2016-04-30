@@ -55,6 +55,11 @@ module.exports = class ElegantApi {
     this._needReloadRouteNameMap = {};
 
     util.each(this.routes, route => this.apis[route.name] = this._generateApi(route));
+
+    if (__DEBUG__) {
+      console.warn('You are using a debug version of elegant-api, '
+        + 'you can switch to production version by using elegant-api.min.js');
+    }
   }
 
   // 下面几个以 _apply 全是 _transform 相关的函数
@@ -331,12 +336,23 @@ module.exports = class ElegantApi {
 
   _response(route, transformData, cb) {
     let {mock, http} = route;
+    if (__DEBUG__ && mock.debug) {
+      console.debug('ea:response route: %o, transformData %o', route, transformData);
+    }
+
+    let memoryHandle = () => {
+      mockResponse(this.mocks, route.name, transformData, (error, data) => {
+        route.handle({http, error, data}, cb);
+      });
+    };
+
     if (mock.memory) {
-      setTimeout(() => {
-        mockResponse(this.mocks, route.name, transformData, (error, data) => {
-          route.handle({http, error, data}, cb);
-        });
-      }, mock.delay);
+      // 如果是 0，说明用户不想要异步，这样可以快速得到数据
+      if (mock.delay === 0) {
+        memoryHandle();
+      } else {
+        setTimeout(memoryHandle, mock.delay);
+      }
     } else {
       route.handle({http}, cb);
     }

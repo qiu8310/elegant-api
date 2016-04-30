@@ -139,6 +139,11 @@ interface EAOptionHttp {
     [headerName: string]: any;
   };
   [httpName: string]: any; // 可以添加其它的任何 http 参数
+
+  /**
+   * 这个不需要配置，是根据你上面的配置生成的
+   */
+  url?: string;
 }
 
 //============================================
@@ -170,9 +175,11 @@ interface EAOptionRoutes {
  *  EAOptionRoutesItem 主要用覆盖 elegant-api 中的全局的配置的
  */
 interface EAOptionRoutesItem {
+  debug?: boolean;
   cache?: boolean;
   path?: string;
   method?: string;
+  mock?: EAOptionMock,
   query?: EAOptionQueryAndData;
   data?: EAOptionQueryAndData;
   request?: EAOptionRequestAndResponse;

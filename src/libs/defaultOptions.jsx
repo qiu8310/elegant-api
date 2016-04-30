@@ -1,6 +1,6 @@
 
 export default {
-  debug: true, // 开启调试模式（现在还没有任何实现）
+  debug: false, // 开启调试模式
   base: '', // 指定基准路径，这样在单独的 route 中只要指定不同的部分即可
   path: '',
   // query: 'a=:aa&b=',  // 需要参数 `aa` and `b`
