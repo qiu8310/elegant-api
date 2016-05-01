@@ -291,12 +291,12 @@ module.exports = class ElegantApi {
     }
   }
 
-  _generateApi(route) {
+  _generateApi(initRoute) {
     return (userArgs, userRoute, cb) => {
-
+      let route;
       // 返回的是一个全新的 route，其中 route.http.{path, params, query, data} 都是计算后的
       try {
-        route = formatRealtimeRoute(route, userArgs, userRoute);
+        route = formatRealtimeRoute(initRoute, userArgs, userRoute);
       } catch (e) {
         return cb(e);
       }
