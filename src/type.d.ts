@@ -24,13 +24,13 @@ interface EACallback {
 /**
  * 通过 EAApi 可以调用 ajax 接口
  */
-interface EAApi {
-  (data?: any, config?: {
+interface EAApi<T, R> {
+  (data?: T, config?: {
     http?: EAOptionHttp;
     mock?: EAOptionMock;
     debug?: boolean;
     cache?: EAOptionCache;
-  }): any;
+  }): Promise<R>;
 }
 
 

@@ -168,7 +168,6 @@ module.exports = class ElegantApi {
    */
   _cache(route, cb) {
     let cache = this._getCache(route);
-
     if (cache.exists) {
       cb(null, cache.value);
       return false;
@@ -213,6 +212,11 @@ module.exports = class ElegantApi {
       value = cacheMap[key];
     }
 
+    if (__DEBUG__ && route.mock.debug) {
+      console.debug('EA:(cache) check %s %o, %sexists!',
+        name, {key, keys: util.objectKeys(cacheMap)}, exists ? '' : 'not ');
+    }
+
     return {exists, value};
   }
 
@@ -222,6 +226,10 @@ module.exports = class ElegantApi {
 
     let ref = cacheMap[name] || {},
       key = JSON.stringify([http.params, util.omit(http.query, ['__ea', '__eaData'])]);
+
+    if (__DEBUG__ && route.mock.debug) {
+      console.debug('EA:(cache) set %s %o', name, {key, cacheMap});
+    }
 
     ref[key] = data;
     cacheMap[name] = ref;
@@ -264,8 +272,6 @@ module.exports = class ElegantApi {
    */
   _emulate(route) {
     let {mock, http, name} = route;
-
-    util.each(http.query, (val, key, query) => query[key] = String(val));
 
     let qs = util.buildQuery(http.query);
     http.url = util.appendQuery(http.path, qs);
@@ -310,6 +316,7 @@ module.exports = class ElegantApi {
         cb = this._cache(route, cb);
         if (cb === false) return false; // 说明直接使用了缓存的数据
       }
+      // 下面的步骤不能对 query 和 params 处理，否则会影响 cache, (__ea 和 __eaData 参数除外)
 
       http.body = http.data = decodeUserData(http.data);
       let transformData = this._generateApiTransformData(route);
@@ -337,7 +344,7 @@ module.exports = class ElegantApi {
   _response(route, transformData, cb) {
     let {mock, http} = route;
     if (__DEBUG__ && mock.debug) {
-      console.debug('ea:response route: %o, transformData %o', route, transformData);
+      console.debug('EA:(response) route: %o, transformData %o', route, transformData);
     }
 
     let memoryHandle = () => {

@@ -354,6 +354,9 @@ export function formatRealtimeRoute(route, userArgs, userRoute) {
 
   let {params, query, data} = parseUserArgs(userArgs, route);
 
+  // 保证 query 是字符串
+  util.each(query, (val, key, query) => query[key] = String(val));
+
   http.path = getFullPathFromParams(http.path, params);
   http.params = params;
   http.query = query;

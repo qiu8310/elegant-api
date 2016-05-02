@@ -74,7 +74,7 @@ BTW，像这篇文章【[Angular2 mock backend](http://www.sitepoint.com/angular
 let elegantApi: ElegantApi = require('elegant-api');
 
 interface API extends ElegantApiColluction {
-  getUser: EAApi;
+  getUser: EAApi<P, R>; // P 是请求参数的结构， R 是返回的参数的结构
 }
 
 let api: API = elegantApi({
