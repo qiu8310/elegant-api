@@ -346,6 +346,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var util = __webpack_require__(1);
 	var mockResponse = __webpack_require__(7);
+	var isServer = typeof window === 'undefined';
 	
 	var STORAGE = undefined;
 	try {
@@ -405,6 +406,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return _this.apis[route.name] = _this._generateApi(route);
 	    });
 	
+	    /* istanbul ignore next */
 	    if (true) {
 	      console.warn('You are using a debug version of elegant-api, ' + 'you can switch to production version by using elegant-api.min.js');
 	    }
@@ -585,6 +587,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      value = cacheMap[key];
 	    }
 	
+	    /* istanbul ignore next */
 	    if ((true) && route.mock.debug) {
 	      console.debug('EA:(cache) check %s %o, %sexists!', name, { key: key, keys: util.objectKeys(cacheMap) }, exists ? '' : 'not ');
 	    }
@@ -603,6 +606,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var ref = cacheMap[name] || {},
 	        key = JSON.stringify([http.params, util.omit(http.query, ['__ea', '__eaData'])]);
 	
+	    /* istanbul ignore next */
 	    if ((true) && route.mock.debug) {
 	      console.debug('EA:(cache) set %s %o', name, { key: key, cacheMap: cacheMap });
 	    }
@@ -716,7 +720,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        http.query.__ea = route.name;
 	
 	        // cookie 不支持跨域，但在 karma 上只能测试到跨域
-	        if (!mock.server && route.dataTransformMethod === 'cookie') {
+	        if (!mock.server && route.dataTransformMethod === 'cookie' && !isServer) {
 	          document.cookie = '__ea' + route.name + '=' + encodeURIComponent(transformData) + '; expires=' + new Date(Date.now() + 5000).toUTCString() + '; path=/';
 	        } else {
 	          http.query.__eaData = transformData;
@@ -733,6 +737,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    var mock = route.mock;
 	    var http = route.http;
+	
+	    /* istanbul ignore next */
 	
 	    if ((true) && mock.debug) {
 	      console.debug('EA:(response) route: %o, transformData %o', route, transformData);
@@ -762,12 +768,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var prefix = this.globals.eaQueryPrefix;
 	    var http = route.http;
 	
-	    var search = undefined;
+	    var search = '';
 	
 	    /* istanbul ignore else */
 	    if (false) {
 	      search = route.__search || ''; // only for test
-	    } else {
+	    } else if (!isServer) {
 	        search = location.search.slice(1);
 	      }
 	
@@ -808,7 +814,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      callback(new SyntaxError('Illegal arguments.'));
 	    };
 	
-	    if (window.Promise) {
+	    if (typeof Promise !== 'undefined') {
 	      return new Promise(function (resolve, reject) {
 	        end(function (err, data) {
 	          if (err) reject(err);else resolve(data);

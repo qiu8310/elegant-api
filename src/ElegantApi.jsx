@@ -4,6 +4,7 @@ import {mixin} from './libs/mockHelper';
 
 const util = require('./libs/util');
 const mockResponse = require('../plugins/mock');
+const isServer = typeof window === 'undefined';
 
 import {
   decodeUserData,
@@ -56,6 +57,7 @@ module.exports = class ElegantApi {
 
     util.each(this.routes, route => this.apis[route.name] = this._generateApi(route));
 
+    /* istanbul ignore next */
     if (__DEBUG__) {
       console.warn('You are using a debug version of elegant-api, '
         + 'you can switch to production version by using elegant-api.min.js');
@@ -212,6 +214,7 @@ module.exports = class ElegantApi {
       value = cacheMap[key];
     }
 
+    /* istanbul ignore next */
     if (__DEBUG__ && route.mock.debug) {
       console.debug('EA:(cache) check %s %o, %sexists!',
         name, {key, keys: util.objectKeys(cacheMap)}, exists ? '' : 'not ');
@@ -227,6 +230,7 @@ module.exports = class ElegantApi {
     let ref = cacheMap[name] || {},
       key = JSON.stringify([http.params, util.omit(http.query, ['__ea', '__eaData'])]);
 
+    /* istanbul ignore next */
     if (__DEBUG__ && route.mock.debug) {
       console.debug('EA:(cache) set %s %o', name, {key, cacheMap});
     }
@@ -326,7 +330,7 @@ module.exports = class ElegantApi {
         http.query.__ea = route.name;
 
         // cookie 不支持跨域，但在 karma 上只能测试到跨域
-        if (!mock.server && route.dataTransformMethod === 'cookie') {
+        if (!mock.server && route.dataTransformMethod === 'cookie' && !isServer) {
           document.cookie = '__ea' + route.name + '='
             + encodeURIComponent(transformData)
             + '; expires=' + (new Date(Date.now() + 5000).toUTCString())
@@ -343,6 +347,8 @@ module.exports = class ElegantApi {
 
   _response(route, transformData, cb) {
     let {mock, http} = route;
+
+    /* istanbul ignore next */
     if (__DEBUG__ && mock.debug) {
       console.debug('EA:(response) route: %o, transformData %o', route, transformData);
     }
@@ -371,12 +377,12 @@ module.exports = class ElegantApi {
     let prefix = this.globals.eaQueryPrefix;
     let http = route.http;
 
-    let search;
+    let search = '';
 
     /* istanbul ignore else */
     if (process.env.NODE_ENV === 'test') {
       search = route.__search || ''; // only for test
-    } else {
+    } else if (!isServer) {
       search = location.search.slice(1);
     }
 
@@ -414,7 +420,7 @@ module.exports = class ElegantApi {
       callback(new SyntaxError('Illegal arguments.'));
     };
 
-    if (window.Promise) {
+    if (typeof Promise !== 'undefined') {
       return new Promise((resolve, reject) => {
         end((err, data) => {
           if (err) reject(err);

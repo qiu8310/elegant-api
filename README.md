@@ -104,6 +104,14 @@ api.getUser({uid: 123}).then(data => {
 ```
 
 
+### 服务端使用
+
+- 不支持 ea 对象（ea 对象主要是通过获取当前 location.search 中的特殊字段组装的）
+- 不支持将 dataTransformMethod 设置成 cookie
+- 服务端使用其实应该将 mocks 选项看作是真实的去获取数据的函数
+
+
+
 ### 配置
 
 * [typescript 配置描述](./src/type.ts)
