@@ -18,7 +18,21 @@ module.exports = function (httpOptions, mockOptions) {
       result[key] = val === undefined ? null : val;
       return result;
     }, {}) : {};
-  }
+  };
+
+  result.$cache = function (cache) {
+    let ref = cache || ea.globals;
+    let {cacheMap, cacheStack} = ref;
+
+    if (!cache) {
+      return {cacheMap, cacheStack};
+    } else {
+      if (cacheMap && cacheStack) {
+        ea.globals.cacheMap = cacheMap;
+        ea.globals.cacheStack = cacheStack;
+      }
+    }
+  };
 
   return result;
 };

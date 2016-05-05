@@ -314,8 +314,19 @@ interface ElegantApiColluction {
   $request(reouteNames: Array<EARouteName>, seriesConfig?: any, routeConfigObj?: any, callback?: EACallback): Promise<any>;
   $request(reouteNameObj: any, parallelConfig?: any, routeConfigObj?: any, callback?: EACallback): Promise<any>;
 
+  /**
+   * $resource 的别名
+   */
   $r(key: EAResourceName): any;
+  /**
+   * 生成 resource 的初始对象
+   */
   $resource(key: EAResourceName): any;
+
+  /**
+   * 获取缓存，或设置缓存
+   */
+  $cache(cache?: any): any;
 
   [routeName: string]: any;
 }

@@ -86,6 +86,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {}) : {};
 	  };
 	
+	  result.$cache = function (cache) {
+	    var ref = cache || ea.globals;
+	    var cacheMap = ref.cacheMap;
+	    var cacheStack = ref.cacheStack;
+	
+	    if (!cache) {
+	      return { cacheMap: cacheMap, cacheStack: cacheStack };
+	    } else {
+	      if (cacheMap && cacheStack) {
+	        ea.globals.cacheMap = cacheMap;
+	        ea.globals.cacheStack = cacheStack;
+	      }
+	    }
+	  };
+	
 	  return result;
 	};
 	
@@ -112,6 +127,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.buildQuery = buildQuery;
 	exports.urlNormalize = urlNormalize;
 	exports.appendQuery = appendQuery;
+	var isServer = exports.isServer = typeof window === 'undefined';
+	
 	/**
 	 * 只是一个空函数，什么也不做
 	 */
@@ -346,7 +363,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var util = __webpack_require__(1);
 	var mockResponse = __webpack_require__(7);
-	var isServer = typeof window === 'undefined';
 	
 	var STORAGE = undefined;
 	try {
@@ -673,7 +689,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    if (mock.server && !/^https?:\/\//.test(http.url)) {
 	      http.crossOrigin = true;
-	      http.url = util.urlNormalize(mock.server + http.url);
+	      http.url = util.urlNormalize((mock.server === 'self' ? '' : mock.server) + http.url);
 	    }
 	
 	    if (route.emulateHTTP && !http.crossOrigin && /^(PUT|PATCH|DELETE)$/.test(http.method)) {
@@ -720,7 +736,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        http.query.__ea = route.name;
 	
 	        // cookie 不支持跨域，但在 karma 上只能测试到跨域
-	        if (!mock.server && route.dataTransformMethod === 'cookie' && !isServer) {
+	        if (!mock.server && route.dataTransformMethod === 'cookie' && !util.isServer) {
 	          document.cookie = '__ea' + route.name + '=' + encodeURIComponent(transformData) + '; expires=' + new Date(Date.now() + 5000).toUTCString() + '; path=/';
 	        } else {
 	          http.query.__eaData = transformData;
@@ -773,7 +789,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    /* istanbul ignore else */
 	    if (false) {
 	      search = route.__search || ''; // only for test
-	    } else if (!isServer) {
+	    } else if (!util.isServer) {
 	        search = location.search.slice(1);
 	      }
 	
@@ -831,6 +847,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    callback(new Error('Request key \'' + key + '\' not exists.'));
 	  };
 	
+	  // 应该废弃?  可以使用 Promise.then
+	
 	  ElegantApi.prototype._batchSeriesRequest = function _batchSeriesRequest(arr, conf, config, callback) {
 	    var _this10 = this;
 	
@@ -859,6 +877,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    next();
 	  };
+	
+	  // 应该废弃？ 可以使用 Promise.all
 	
 	  ElegantApi.prototype._batchParallelRequest = function _batchParallelRequest(obj, conf, config, callback) {
 	    var _this11 = this;
@@ -1096,8 +1116,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  mock: {
 	    // disabled: false, // 是否禁用 mock
 	    memory: true, // 是否使用缓存来 mock
-	    server: null, // 指定独立的 mock 服务器（需要 memory 为 false)
-	    proxy: null, // 指定代理的服务器（需要 memory 为 false)
+	
+	    // 指定独立的 mock 服务器, e.g: http://domain.com/
+	    // 需要指定 memory 为 false，另外其值可以指定为 'self'，表示使用当前域名)
+	    server: null,
+	    proxy: null, // 指定代理的服务器（不推荐使用，需要 memory 为 false)
 	    delay: { min: 200, max: 1000 } // 或者指定为一个具体的数字
 	  },
 	  dataTransformMethod: 'query', // query/cookie  cookie 只能用在没有独立的 mock server 的情况下，因为 cookie 无法跨域

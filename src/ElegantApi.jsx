@@ -6,7 +6,6 @@ const util = require('./libs/util');
 const mockResponse = require('../plugins/mock');
 
 import {
-  isServer,
   decodeUserData,
   formatRootOptions,
   formatInitialRoute,
@@ -330,7 +329,7 @@ module.exports = class ElegantApi {
         http.query.__ea = route.name;
 
         // cookie 不支持跨域，但在 karma 上只能测试到跨域
-        if (!mock.server && route.dataTransformMethod === 'cookie' && !isServer) {
+        if (!mock.server && route.dataTransformMethod === 'cookie' && !util.isServer) {
           document.cookie = '__ea' + route.name + '='
             + encodeURIComponent(transformData)
             + '; expires=' + (new Date(Date.now() + 5000).toUTCString())
@@ -382,7 +381,7 @@ module.exports = class ElegantApi {
     /* istanbul ignore else */
     if (process.env.NODE_ENV === 'test') {
       search = route.__search || ''; // only for test
-    } else if (!isServer) {
+    } else if (!util.isServer) {
       search = location.search.slice(1);
     }
 
