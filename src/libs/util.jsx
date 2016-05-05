@@ -1,3 +1,5 @@
+export const isServer = typeof window === 'undefined';
+
 /**
  * 只是一个空函数，什么也不做
  */

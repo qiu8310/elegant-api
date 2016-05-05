@@ -30,7 +30,7 @@ describe('EA Proxy And Server', () => {
   afterEach(() => delete window.jQuery);
 
   context('karma server', () => {
-    it('should throws when no jQuery', () => {
+    it('should throws when no jQuery', done => {
       delete window.jQuery;
       EA = new ElegantApi({
         mock: false,
@@ -43,6 +43,22 @@ describe('EA Proxy And Server', () => {
         err.message.should.match(/Need implement handler function in options/);
         done();
       });
+    });
+
+    it('should mock self', done => {
+      EA = new ElegantApi({
+        mock: {server: 'self', memory: false},
+        base: '/api',
+        routes: {
+          foo: { path: '/bar', debug: true }
+        }
+      });
+      EA.request('foo').then(data => {
+        assert.ok(data.url.indexOf('/api/bar?') === 0);
+        data.from.should.eql('karma-middleware');
+        done();
+      }).catch(done);
+
     });
 
     it('should get remote response data', done => {
@@ -116,7 +132,7 @@ describe('EA Proxy And Server', () => {
       }));
       EA.request('userA', {uid: 20});
     });
-    it('should not use cookie when crossSite', () => {
+    it('should not use cookie when crossSite', done => {
       EA = new ElegantApi(extend(true, {}, OPTIONS, {
         mock: {server: SERVER},
         dataTransformMethod: 'cookie',
@@ -128,7 +144,7 @@ describe('EA Proxy And Server', () => {
       }));
       EA.request('userB', {uid: 20});
     });
-    it('should not use cookie or query when online', () => {
+    it('should not use cookie or query when online', done => {
       EA = new ElegantApi(extend(true, {}, OPTIONS, {
         mock: false,
         dataTransformMethod: 'cookie',

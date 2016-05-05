@@ -15,8 +15,11 @@ export default {
   mock: {
     // disabled: false, // 是否禁用 mock
     memory: true, // 是否使用缓存来 mock
-    server: null, // 指定独立的 mock 服务器（需要 memory 为 false)
-    proxy: null, // 指定代理的服务器（需要 memory 为 false)
+
+    // 指定独立的 mock 服务器, e.g: http://domain.com/
+    // 需要指定 memory 为 false，另外其值可以指定为 'self'，表示使用当前域名)
+    server: null,
+    proxy: null, // 指定代理的服务器（不推荐使用，需要 memory 为 false)
     delay: { min: 200, max: 1000 } // 或者指定为一个具体的数字
   },
   dataTransformMethod: 'query', // query/cookie  cookie 只能用在没有独立的 mock server 的情况下，因为 cookie 无法跨域

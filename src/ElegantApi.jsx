@@ -4,9 +4,9 @@ import {mixin} from './libs/mockHelper';
 
 const util = require('./libs/util');
 const mockResponse = require('../plugins/mock');
-const isServer = typeof window === 'undefined';
 
 import {
+  isServer,
   decodeUserData,
   formatRootOptions,
   formatInitialRoute,
@@ -287,7 +287,7 @@ module.exports = class ElegantApi {
 
     if (mock.server && !/^https?:\/\//.test(http.url)) {
       http.crossOrigin = true;
-      http.url = util.urlNormalize(mock.server + http.url);
+      http.url = util.urlNormalize((mock.server === 'self' ? '' : mock.server) + http.url);
     }
 
     if (route.emulateHTTP && !http.crossOrigin && /^(PUT|PATCH|DELETE)$/.test(http.method)) {
@@ -438,6 +438,7 @@ module.exports = class ElegantApi {
     callback(new Error(`Request key '${key}' not exists.`));
   }
 
+  // 应该废弃?  可以使用 Promise.then
   _batchSeriesRequest(arr, conf, config, callback) {
     let index = 0;
 
@@ -464,6 +465,7 @@ module.exports = class ElegantApi {
     next();
   }
 
+  // 应该废弃？ 可以使用 Promise.all
   _batchParallelRequest(obj, conf, config, callback) {
     let keys = Object.keys(obj), len = keys.length;
 
