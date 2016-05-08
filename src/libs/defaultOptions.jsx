@@ -36,6 +36,7 @@ export default {
   http: {
     method: 'GET',
     crossOrigin: false,
+    credentials: 'same-origin', // fetch 函数需要使用的参数
     dataType: 'json',
     // url: null, // url 不用设置，会根据配置自动生成合适的值
     // body: null, // fetch api 标准是用 body

@@ -121,6 +121,7 @@ declare type EAOptionRequestAndResponseOrder = 'resource' | 'alias' | 'computed'
  */
 declare type EAOptionCache = EAOptionCacheSmart | boolean;
 declare type EAOptionCacheSmart = 'smart';
+declare type EAOptionDataTransformMethod = 'cookie' | 'query';
 
 
 //============================================
@@ -133,6 +134,7 @@ declare type EAOptionCacheSmart = 'smart';
 interface EAOptionHttp {
   method?: string; // GET, HEAD, POST ... 不区分大小小
   crossOrigin?: boolean; // jQuery ajax 中的，表示是否跨域
+  credentials?: string; // fetch 使用，可以是 include 或 same-origin，默认设置成后者
   dataType?: string; // jQuery ajax 中的，表示返回的参数类型
   data?: any; // 请求的参数
   headers?: {
@@ -144,6 +146,7 @@ interface EAOptionHttp {
    * 这个不需要配置，是根据你上面的配置生成的
    */
   url?: string;
+  body?: any;
 }
 
 //============================================
@@ -269,6 +272,8 @@ interface EAOptions {
   request?: EAOptionRequestAndResponse; // 指定默认的 request 参数，RouteOptins 中如果也配置了会覆盖同名的参数
   response?: EAOptionRequestAndResponse; // 指定默认的 response 参数，RouteOptins 中如果也配置了会覆盖同名的参数
 
+  // 如果用了 mock.server 的话，可以通过 cookie 或者 query 的方式将一些 ea 数据传给服务端
+  dataTransformMethod?: EAOptionDataTransformMethod;
 
   // 来自于 vue-resource
   emulateJSON?: boolean; // 添加 header: Content-Type=application/x-www-form-urlencoded，同时对参数 urlencode 处理
@@ -313,6 +318,11 @@ interface ElegantApiColluction {
   $request(reouteName: EARouteName, params?: any, reouteConfig?: any, callback?: EACallback): Promise<any>;
   $request(reouteNames: Array<EARouteName>, seriesConfig?: any, routeConfigObj?: any, callback?: EACallback): Promise<any>;
   $request(reouteNameObj: any, parallelConfig?: any, routeConfigObj?: any, callback?: EACallback): Promise<any>;
+
+  /**
+   * 真实的 ElegantApi 的实例
+   */
+  $ea: any;
 
   /**
    * $resource 的别名

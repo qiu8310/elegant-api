@@ -718,6 +718,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var _route = route;
 	      var mock = _route.mock;
 	      var http = _route.http;
+	      var dataTransformMethod = _route.dataTransformMethod;
 	
 	      cb = _this7._transform(route, cb);
 	
@@ -736,8 +737,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        http.query.__ea = route.name;
 	
 	        // cookie 不支持跨域，但在 karma 上只能测试到跨域
-	        if (!mock.server && route.dataTransformMethod === 'cookie' && !util.isServer) {
-	          document.cookie = '__ea' + route.name + '=' + encodeURIComponent(transformData) + '; expires=' + new Date(Date.now() + 5000).toUTCString() + '; path=/';
+	        if ((!mock.server || mock.server === 'self') && dataTransformMethod === 'cookie' && !util.isServer) {
+	          var now = new Date();
+	          now.setTime(now.getTime() + 5000);
+	          var cookie = '__ea' + route.name + '=' + encodeURIComponent(transformData) + '; expires=' + now.toUTCString() + '; path=/';
+	
+	          /* istanbul ignore next */
+	          if ((true) && mock.debug) {
+	            console.debug('EA:(request) write cookie %o', cookie);
+	          }
+	
+	          document.cookie = cookie;
 	        } else {
 	          http.query.__eaData = transformData;
 	        }
@@ -1137,6 +1147,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  http: {
 	    method: 'GET',
 	    crossOrigin: false,
+	    credentials: 'same-origin', // fetch 函数需要使用的参数
 	    dataType: 'json',
 	    // url: null, // url 不用设置，会根据配置自动生成合适的值
 	    // body: null, // fetch api 标准是用 body

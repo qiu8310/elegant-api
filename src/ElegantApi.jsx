@@ -310,8 +310,7 @@ module.exports = class ElegantApi {
         return cb(e);
       }
 
-
-      let {mock, http} = route;
+      let {mock, http, dataTransformMethod} = route;
       cb = this._transform(route, cb);
 
       // cache
@@ -329,11 +328,20 @@ module.exports = class ElegantApi {
         http.query.__ea = route.name;
 
         // cookie 不支持跨域，但在 karma 上只能测试到跨域
-        if (!mock.server && route.dataTransformMethod === 'cookie' && !util.isServer) {
-          document.cookie = '__ea' + route.name + '='
+        if ((!mock.server || mock.server === 'self') && dataTransformMethod === 'cookie' && !util.isServer) {
+          let now = new Date();
+          now.setTime(now.getTime() + 5000);
+          let cookie = '__ea' + route.name + '='
             + encodeURIComponent(transformData)
-            + '; expires=' + (new Date(Date.now() + 5000).toUTCString())
+            + '; expires=' + now.toUTCString()
             + '; path=/';
+
+          /* istanbul ignore next */
+          if (__DEBUG__ && mock.debug) {
+            console.debug('EA:(request) write cookie %o', cookie);
+          }
+
+          document.cookie = cookie;
         } else {
           http.query.__eaData = transformData;
         }
