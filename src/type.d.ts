@@ -112,6 +112,9 @@ interface EAOptionRequestAndResponse {
  */
 declare type EAOptionRequestAndResponseOrder = 'resource' | 'alias' | 'computed' | 'drop' | 'map' | 'naming';
 
+
+declare type EAOptionHttpCredentials = 'omit' | 'same-origin' | 'include';
+
 //============================================
 //===== cache option
 //============================================
@@ -134,7 +137,7 @@ declare type EAOptionDataTransformMethod = 'cookie' | 'query';
 interface EAOptionHttp {
   method?: string; // GET, HEAD, POST ... 不区分大小小
   crossOrigin?: boolean; // jQuery ajax 中的，表示是否跨域
-  credentials?: string; // fetch 使用，可以是 include 或 same-origin，默认设置成后者
+  credentials?: EAOptionHttpCredentials; // fetch 会用到的参数，默认设置成 'same-origin'
   dataType?: string; // jQuery ajax 中的，表示返回的参数类型
   data?: any; // 请求的参数
   headers?: {
