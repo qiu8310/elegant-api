@@ -16,6 +16,7 @@ module.exports = function (mockOptions) {
     }
 
     eaData = eaData || req.cookies['__ea' + key];
+    res.clearCookie('__ea' + key);
 
     try {
       http = base.parse(eaData);
