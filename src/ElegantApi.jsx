@@ -204,13 +204,19 @@ module.exports = class ElegantApi {
     let {cacheMap} = this.globals;
     let {name, http} = route, key;
 
-    let exists = false, value = null;
+    let exists = false, value = null, data;
 
     if (name in cacheMap) {
       cacheMap = cacheMap[name];
       key = JSON.stringify([http.params, http.query]);
       exists = key in cacheMap;
-      value = cacheMap[key];
+      data = cacheMap[key] || {};
+      let expire = data.expire;
+      if (expire !== 0 && expire < (+new Date)) {
+        exists = false;
+      } else {
+        value = data.value;
+      }
     }
 
     /* istanbul ignore next */
@@ -222,7 +228,7 @@ module.exports = class ElegantApi {
     return {exists, value};
   }
 
-  _setCache(route, data) {
+  _setCache(route, value) {
     let {cacheSize, cacheMap, cacheStack} = this.globals;
     let {name, http} = route;
 
@@ -234,7 +240,9 @@ module.exports = class ElegantApi {
       console.debug('EA:(cache) set %s %o', name, {key, cacheMap});
     }
 
-    ref[key] = data;
+    let expire = route.cache.expireSeconds * 1000;
+    if (expire > 0) expire += +new Date;
+    ref[key] = {value, expire};
     cacheMap[name] = ref;
     cacheStack.push([name, key]);
 
@@ -279,7 +287,7 @@ module.exports = class ElegantApi {
     let qs = util.buildQuery(http.query);
     http.url = util.appendQuery(http.path, qs);
 
-    if (!route.cache || this._needReloadRouteNameMap[name]) {
+    if (!route.cache.enable || this._needReloadRouteNameMap[name]) {
       http.url = util.appendQuery(http.url, this.globals.cacheQueryKey + '=' + (new Date().getTime()));
       delete this._needReloadRouteNameMap[name];
     }
@@ -314,7 +322,7 @@ module.exports = class ElegantApi {
       cb = this._transform(route, cb);
 
       // cache
-      if (route.cache) {
+      if (route.cache.enable) {
         cb = this._cache(route, cb);
         if (cb === false) return false; // 说明直接使用了缓存的数据
       }

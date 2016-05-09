@@ -374,6 +374,39 @@ describe('EA Config', () => {
         done();
       }).catch(done);
     });
+
+    it('should support expire', done => {
+      EA = new ElegantApi({
+        mock: {delay: 0},
+        routes: {
+          foo: {
+            cache: {enable: true, expireSeconds: 0.1}
+          }
+        },
+        mocks: { $default(target, cb) { cb(null, Math.random()); } }
+      });
+
+      let value;
+      EA.request('foo')
+      .then(d => {
+        value = d;
+        return EA.request('foo');
+      })
+      .then(d => {
+        d.should.eql(value);
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            EA.request('foo').then(resolve, reject)
+          }, 300);
+        });
+      })
+      .then(d => {
+        d.should.not.eql(value);
+        done();
+      })
+      .catch(done);
+
+    });
   });
 
   context('emulate', () => {

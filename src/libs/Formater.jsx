@@ -134,8 +134,21 @@ function formatRouteMockOption(route) {
  * @private
  */
 function formatRouteCacheOption(route) {
-  route.cache = route.cache === 'smart' && SMART_CACHE_HTTP_METHODS.indexOf(route.http.method) >= 0
-    || route.cache === true;
+  let cache = route.cache, enable, expireSeconds = 0;
+
+  if (!util.isObject(cache)) {
+    enable = cache;
+  } else {
+    enable = cache.enable;
+    expireSeconds = cache.expireSeconds || 0;
+  }
+
+  enable = enable === 'smart' && SMART_CACHE_HTTP_METHODS.indexOf(route.http.method) >= 0
+    || enable === true;
+
+  if (expireSeconds < 0) enable = false;
+
+  route.cache = {enable, expireSeconds};
 
   return route.cache;
 }

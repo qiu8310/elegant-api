@@ -288,7 +288,7 @@ api.getUser({uid: 123}).then(data => {
 * [ ] 支持添加 request 和 response 的 interceptor
 * [ ] request 中的 map 只能 map data，希望可以支持 mapPath, mapQuery
 * [ ] resource 支持 get/set/post/put/delete 方法
-* [ ] 支持添加缓存，获取缓存，并设置缓存过期时间（方便 server side render）
+* [x] 支持添加缓存，获取缓存，并设置缓存过期时间（方便 server side render）
 * [x] mock.server 可以设置成 self，表示使用当前服务器来做 mock server
 
 

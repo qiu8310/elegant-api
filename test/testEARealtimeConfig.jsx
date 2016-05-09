@@ -60,7 +60,7 @@ describe('EA Realtime Config', () => {
         }
       },
       handle(target, cb) {
-        this.cache.should.eql(false);
+        this.cache.enable.should.eql(false);
         done();
       }
     });

@@ -10,7 +10,9 @@ export default {
   emulateJSON: false,
   emulateHTTP: false,
 
-  cache: 'smart', // 只有 GET 请求才会缓存，另外可以单独在 route 中指定 true 或者 false
+  // 只有 GET 请求才会缓存，另外可以单独在 route 中指定 true 或者 false
+  // 也可以设置成对象的形式： { enable: 'smart'/true/false, expireSeconds: number }
+  cache: 'smart',
 
   mock: {
     // disabled: false, // 是否禁用 mock

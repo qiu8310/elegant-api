@@ -122,8 +122,10 @@ declare type EAOptionHttpCredentials = 'omit' | 'same-origin' | 'include';
 /**
  * 当为 EAOptionCacheSmart 时, 表示用 GET、HEAD 请求时就启用缓存， 其它则禁用
  */
-declare type EAOptionCache = EAOptionCacheSmart | boolean;
 declare type EAOptionCacheSmart = 'smart';
+declare type EAOptionCacheEnable = EAOptionCacheSmart | boolean;
+declare type EAOptionCache = EAOptionCacheEnable | { enable: EAOptionCacheEnable, expireSeconds?: number };
+
 declare type EAOptionDataTransformMethod = 'cookie' | 'query';
 
 
@@ -182,7 +184,7 @@ interface EAOptionRoutes {
  */
 interface EAOptionRoutesItem {
   debug?: boolean;
-  cache?: boolean;
+  cache?: EAOptionCache;
   path?: string;
   method?: string;
   mock?: EAOptionMock,
