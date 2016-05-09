@@ -22,6 +22,13 @@ try { // IE 8 下直接调用 window.localStorage 会报错
   STORAGE = localStorage;
 } catch (e) { STORAGE = {}; }
 
+function debug(condition, ...args) {
+  /* istanbul ignore next */
+  if (condition && __DEBUG__ && console.debug) {
+    console.debug.apply(console, args);
+  }
+}
+
 /**
  * @class ElegantApi
  */
@@ -56,11 +63,9 @@ module.exports = class ElegantApi {
 
     util.each(this.routes, route => this.apis[route.name] = this._generateApi(route));
 
-    /* istanbul ignore next */
-    if (__DEBUG__) {
-      console.warn('You are using a debug version of elegant-api, '
-        + 'you can switch to production version by using elegant-api.min.js');
-    }
+    debug(true, 'You are using a debug version of elegant-api, '
+      + 'you can switch to production version by using elegant-api.min.js');
+
   }
 
   // 下面几个以 _apply 全是 _transform 相关的函数
@@ -219,11 +224,9 @@ module.exports = class ElegantApi {
       }
     }
 
-    /* istanbul ignore next */
-    if (__DEBUG__ && route.mock.debug) {
-      console.debug('EA:(cache) check %s %o, %sexists!',
-        name, {key, keys: util.objectKeys(cacheMap)}, exists ? '' : 'not ');
-    }
+
+    debug(route.mock.debug, 'EA:(cache) check %s %o, %sexists!',
+      name, {key, keys: util.objectKeys(cacheMap)}, exists ? '' : 'not ');
 
     return {exists, value};
   }
@@ -235,10 +238,7 @@ module.exports = class ElegantApi {
     let ref = cacheMap[name] || {},
       key = JSON.stringify([http.params, util.omit(http.query, ['__ea', '__eaData'])]);
 
-    /* istanbul ignore next */
-    if (__DEBUG__ && route.mock.debug) {
-      console.debug('EA:(cache) set %s %o', name, {key, cacheMap});
-    }
+    debug(route.mock.debug, 'EA:(cache) set %s %o', name, {key, cacheMap});
 
     let expire = route.cache.expireSeconds * 1000;
     if (expire > 0) expire += +new Date;
@@ -344,10 +344,7 @@ module.exports = class ElegantApi {
             + '; expires=' + now.toUTCString()
             + '; path=/';
 
-          /* istanbul ignore next */
-          if (__DEBUG__ && mock.debug) {
-            console.debug('EA:(request) write cookie %o', cookie);
-          }
+          debug(mock.debug, 'EA:(request) write cookie %o', cookie);
 
           document.cookie = cookie;
         } else {
@@ -363,10 +360,7 @@ module.exports = class ElegantApi {
   _response(route, transformData, cb) {
     let {mock, http} = route;
 
-    /* istanbul ignore next */
-    if (__DEBUG__ && mock.debug) {
-      console.debug('EA:(response) route: %o, transformData %o', route, transformData);
-    }
+    debug(mock.debug, 'EA:(response) route: %o, transformData %o', route, transformData);
 
     let memoryHandle = () => {
       mockResponse(this.mocks, route.name, transformData, (error, data) => {

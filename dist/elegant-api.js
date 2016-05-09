@@ -374,6 +374,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  STORAGE = {};
 	}
 	
+	function debug(condition) {
+	  /* istanbul ignore next */
+	  if (condition && (true) && console.debug) {
+	    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	      args[_key - 1] = arguments[_key];
+	    }
+	
+	    console.debug.apply(console, args);
+	  }
+	}
+	
 	/**
 	 * @class ElegantApi
 	 */
@@ -422,10 +433,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return _this.apis[route.name] = _this._generateApi(route);
 	    });
 	
-	    /* istanbul ignore next */
-	    if (true) {
-	      console.warn('You are using a debug version of elegant-api, ' + 'you can switch to production version by using elegant-api.min.js');
-	    }
+	    debug(true, 'You are using a debug version of elegant-api, ' + 'you can switch to production version by using elegant-api.min.js');
 	  }
 	
 	  // 下面几个以 _apply 全是 _transform 相关的函数
@@ -594,24 +602,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var http = route.http;var key = undefined;
 	
 	    var exists = false,
-	        value = null;
+	        value = null,
+	        data = undefined;
 	
 	    if (name in cacheMap) {
 	      cacheMap = cacheMap[name];
 	      key = JSON.stringify([http.params, http.query]);
 	      exists = key in cacheMap;
-	      value = cacheMap[key];
+	      data = cacheMap[key] || {};
+	      var expire = data.expire;
+	      if (expire !== 0 && expire < +new Date()) {
+	        exists = false;
+	      } else {
+	        value = data.value;
+	      }
 	    }
 	
-	    /* istanbul ignore next */
-	    if ((true) && route.mock.debug) {
-	      console.debug('EA:(cache) check %s %o, %sexists!', name, { key: key, keys: util.objectKeys(cacheMap) }, exists ? '' : 'not ');
-	    }
+	    debug(route.mock.debug, 'EA:(cache) check %s %o, %sexists!', name, { key: key, keys: util.objectKeys(cacheMap) }, exists ? '' : 'not ');
 	
 	    return { exists: exists, value: value };
 	  };
 	
-	  ElegantApi.prototype._setCache = function _setCache(route, data) {
+	  ElegantApi.prototype._setCache = function _setCache(route, value) {
 	    var _globals2 = this.globals;
 	    var cacheSize = _globals2.cacheSize;
 	    var cacheMap = _globals2.cacheMap;
@@ -622,12 +634,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var ref = cacheMap[name] || {},
 	        key = JSON.stringify([http.params, util.omit(http.query, ['__ea', '__eaData'])]);
 	
-	    /* istanbul ignore next */
-	    if ((true) && route.mock.debug) {
-	      console.debug('EA:(cache) set %s %o', name, { key: key, cacheMap: cacheMap });
-	    }
+	    debug(route.mock.debug, 'EA:(cache) set %s %o', name, { key: key, cacheMap: cacheMap });
 	
-	    ref[key] = data;
+	    var expire = route.cache.expireSeconds * 1000;
+	    if (expire > 0) expire += +new Date();
+	    ref[key] = { value: value, expire: expire };
 	    cacheMap[name] = ref;
 	    cacheStack.push([name, key]);
 	
@@ -682,7 +693,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var qs = util.buildQuery(http.query);
 	    http.url = util.appendQuery(http.path, qs);
 	
-	    if (!route.cache || this._needReloadRouteNameMap[name]) {
+	    if (!route.cache.enable || this._needReloadRouteNameMap[name]) {
 	      http.url = util.appendQuery(http.url, this.globals.cacheQueryKey + '=' + new Date().getTime());
 	      delete this._needReloadRouteNameMap[name];
 	    }
@@ -723,7 +734,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      cb = _this7._transform(route, cb);
 	
 	      // cache
-	      if (route.cache) {
+	      if (route.cache.enable) {
 	        cb = _this7._cache(route, cb);
 	        if (cb === false) return false; // 说明直接使用了缓存的数据
 	      }
@@ -742,10 +753,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          now.setTime(now.getTime() + 5000);
 	          var cookie = '__ea' + route.name + '=' + encodeURIComponent(transformData) + '; expires=' + now.toUTCString() + '; path=/';
 	
-	          /* istanbul ignore next */
-	          if ((true) && mock.debug) {
-	            console.debug('EA:(request) write cookie %o', cookie);
-	          }
+	          debug(mock.debug, 'EA:(request) write cookie %o', cookie);
 	
 	          document.cookie = cookie;
 	        } else {
@@ -764,11 +772,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var mock = route.mock;
 	    var http = route.http;
 	
-	    /* istanbul ignore next */
-	
-	    if ((true) && mock.debug) {
-	      console.debug('EA:(response) route: %o, transformData %o', route, transformData);
-	    }
+	    debug(mock.debug, 'EA:(response) route: %o, transformData %o', route, transformData);
 	
 	    var memoryHandle = function memoryHandle() {
 	      mockResponse(_this8.mocks, route.name, transformData, function (error, data) {
@@ -1121,7 +1125,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  emulateJSON: false,
 	  emulateHTTP: false,
 	
-	  cache: 'smart', // 只有 GET 请求才会缓存，另外可以单独在 route 中指定 true 或者 false
+	  // 只有 GET 请求才会缓存，另外可以单独在 route 中指定 true 或者 false
+	  // 也可以设置成对象的形式： { enable: 'smart'/true/false, expireSeconds: number }
+	  cache: 'smart',
 	
 	  mock: {
 	    // disabled: false, // 是否禁用 mock
@@ -1416,7 +1422,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @private
 	 */
 	function formatRouteCacheOption(route) {
-	  route.cache = route.cache === 'smart' && SMART_CACHE_HTTP_METHODS.indexOf(route.http.method) >= 0 || route.cache === true;
+	  var cache = route.cache,
+	      enable = undefined,
+	      expireSeconds = 0;
+	
+	  if (!util.isObject(cache)) {
+	    enable = cache;
+	  } else {
+	    enable = cache.enable;
+	    expireSeconds = cache.expireSeconds || 0;
+	  }
+	
+	  enable = enable === 'smart' && SMART_CACHE_HTTP_METHODS.indexOf(route.http.method) >= 0 || enable === true;
+	
+	  if (expireSeconds < 0) enable = false;
+	
+	  route.cache = { enable: enable, expireSeconds: expireSeconds };
 	
 	  return route.cache;
 	}
