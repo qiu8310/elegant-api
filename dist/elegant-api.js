@@ -597,7 +597,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	
 	  ElegantApi.prototype._getCache = function _getCache(route) {
-	    var cacheMap = this.globals.cacheMap;
+	    var _globals2 = this.globals;
+	    var cacheMap = _globals2.cacheMap;
+	    var cacheStack = _globals2.cacheStack;
 	    var name = route.name;
 	    var http = route.http;var key = undefined;
 	
@@ -613,6 +615,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var expire = data.expire;
 	      if (expire !== 0 && expire < +new Date()) {
 	        exists = false;
+	
+	        // 删除缓存中的数据
+	        delete cacheMap[key];
+	        for (var i = 0; i < cacheStack.length; i++) {
+	          if (cacheStack[i][0] === name && cacheStack[i][1] === key) {
+	            cacheStack.splice(i, 1);
+	            break;
+	          }
+	        }
 	      } else {
 	        value = data.value;
 	      }
@@ -624,10 +635,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	
 	  ElegantApi.prototype._setCache = function _setCache(route, value) {
-	    var _globals2 = this.globals;
-	    var cacheSize = _globals2.cacheSize;
-	    var cacheMap = _globals2.cacheMap;
-	    var cacheStack = _globals2.cacheStack;
+	    var _globals3 = this.globals;
+	    var cacheSize = _globals3.cacheSize;
+	    var cacheMap = _globals3.cacheMap;
+	    var cacheStack = _globals3.cacheStack;
 	    var name = route.name;
 	    var http = route.http;
 	

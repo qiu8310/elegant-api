@@ -206,7 +206,7 @@ module.exports = class ElegantApi {
 
 
   _getCache(route) {
-    let {cacheMap} = this.globals;
+    let {cacheMap, cacheStack} = this.globals;
     let {name, http} = route, key;
 
     let exists = false, value = null, data;
@@ -219,6 +219,15 @@ module.exports = class ElegantApi {
       let expire = data.expire;
       if (expire !== 0 && expire < (+new Date)) {
         exists = false;
+
+        // 删除缓存中的数据
+        delete cacheMap[key];
+        for (let i = 0; i < cacheStack.length; i++) {
+          if (cacheStack[i][0] === name && cacheStack[i][1] === key) {
+            cacheStack.splice(i, 1);
+            break;
+          }
+        }
       } else {
         value = data.value;
       }
