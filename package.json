@@ -1,6 +1,6 @@
 {
   "name": "elegant-api",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Define elegant api, standalone frontend development",
   "main": "dist/elegant-api.js",
   "jsnext:main": "src/index.jsx",
