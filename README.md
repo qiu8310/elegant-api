@@ -334,6 +334,8 @@ api.getUser({uid: 123}).then(data => {
 ### TODO
 
 * [ ] 看 angularjs.org 是怎么组织静态资源的
+* [ ] 由于使用了 Promise，所以在有缓存的情况下也会异步返回结果，而这回导致像 react 这种库两次更新页面，所以考虑使用 rx.js
+* [ ] 暴露一个 hook，可以动态更新 router 配置，就像 handle ajax 一样
 
 
 ### IDEA

@@ -213,7 +213,7 @@ module.exports = class ElegantApi {
 
     if (name in cacheMap) {
       cacheMap = cacheMap[name];
-      key = JSON.stringify([http.params, http.query]);
+      key = JSON.stringify([http.params, http.query, http.data]);
       exists = key in cacheMap;
       data = cacheMap[key] || {};
       let expire = data.expire;
@@ -245,7 +245,7 @@ module.exports = class ElegantApi {
     let {name, http} = route;
 
     let ref = cacheMap[name] || {},
-      key = JSON.stringify([http.params, util.omit(http.query, ['__ea', '__eaData'])]);
+      key = JSON.stringify([http.params, util.omit(http.query, ['__ea', '__eaData']), http.data]);
 
     debug(route.mock.debug, 'EA:(cache) set %s %o', name, {key, cacheMap});
 
