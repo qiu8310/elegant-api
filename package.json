@@ -1,6 +1,6 @@
 {
   "name": "elegant-api",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Define elegant api, standalone frontend development",
   "main": "dist/elegant-api.js",
   "jsnext:main": "src/index.jsx",
@@ -36,7 +36,7 @@
   },
   "homepage": "https://github.com/qiu8310/elegant-api#readme",
   "dependencies": {
-    "naming-transform": "0.0.8",
+    "naming-transform": "0.1.0",
     "raw-body": "^2.1.5"
   },
   "devDependencies": {
